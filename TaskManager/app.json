@@ -1,0 +1,8 @@
+{
+  "android": {
+    "package": "com.anonymous.taskmanager"
+  },
+  "ios": {
+    "bundleIdentifier": "com.anonymous.taskmanager"
+  }
+}
