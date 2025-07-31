@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Alert } from 'react-native';
+import { Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { TextInput, Button } from 'react-native-paper';
 import { getTasks, saveTasks } from '../services/storageService';
 import styles from '../styles/styles';
@@ -32,7 +33,7 @@ export default function TaskFormScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <TextInput label="Заголовок" value={title} onChangeText={setTitle} style={styles.input} />
       <TextInput label="Описание" value={description} onChangeText={setDescription} style={styles.input} />
       <TextInput label="Дата и время" value={date} onChangeText={setDate} style={styles.input} />
@@ -40,6 +41,6 @@ export default function TaskFormScreen({ navigation }) {
       <Button mode="contained" onPress={saveTask} style={styles.saveButton}>
         Сохранить
       </Button>
-    </View>
+    </SafeAreaView>
   );
 }
