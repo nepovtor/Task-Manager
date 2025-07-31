@@ -1,9 +1,4 @@
 {
-<<<<<<< HEAD
-  "compilerOptions": {},
-  "extends": "expo/tsconfig.base"
-}
-=======
   "compilerOptions": {
     "target": "es5",
     "lib": [
@@ -29,4 +24,3 @@
     "src"
   ]
 }
->>>>>>> 0823204efb84884a0322b43e865bb36631ba8251
