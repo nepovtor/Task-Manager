@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Alert } from 'react-native';
+import { Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Button, Card, IconButton } from 'react-native-paper';
 import { getTasks, saveTasks } from '../services/storageService';
 import styles from '../styles/styles';
@@ -38,7 +39,7 @@ export default function TaskDetailScreen({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Card>
         <Card.Content>
           <Text style={styles.detailTitle}>{currentTask.title}</Text>
@@ -58,6 +59,6 @@ export default function TaskDetailScreen({ route, navigation }) {
       <Button mode="contained" onPress={deleteTask} style={styles.deleteButton}>
         Удалить
       </Button>
-    </View>
+    </SafeAreaView>
   );
 }
