@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { View, FlatList } from 'react-native';
+import { FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Text } from 'react-native-paper';
 import { getTasks } from '../services/storageService';
 import TaskItem from '../components/TaskItem';
@@ -38,7 +39,7 @@ export default function TaskListScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10 }}>
         <Button
           mode={sortType === 'date' ? 'contained' : 'outlined'}
@@ -73,6 +74,6 @@ export default function TaskListScreen({ navigation }) {
       >
         Добавить задачу
       </Button>
-    </View>
+    </SafeAreaView>
   );
 }
