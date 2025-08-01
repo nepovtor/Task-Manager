@@ -34,6 +34,9 @@
     "extra": {
       "supabaseUrl": "https://your-supabase-url.supabase.co",
       "supabaseAnonKey": "your-anon-key"
-    }
+    },
+    "plugins": [
+      "expo-localization"
+    ]
   }
 }

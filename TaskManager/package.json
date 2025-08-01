@@ -20,8 +20,10 @@
     "expo": "^53.0.20",
     "expo-auth-session": "^6.2.1",
     "expo-device": "~7.1.4",
+    "expo-localization": "~16.1.6",
     "expo-notifications": "~0.31.4",
     "expo-status-bar": "~2.2.3",
+    "i18n-js": "^4.5.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.5",
@@ -32,8 +34,7 @@
     "react-native-screens": "~4.11.1",
     "react-native-vector-icons": "^10.0.3",
     "react-native-web": "^0.20.0",
-    "typescript": "~5.8.3",
-    "i18n-js": "^4.5.1"
+    "typescript": "~5.8.3"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
