@@ -22,30 +22,47 @@ export async function registerForPushNotificationsAsync() {
 }
 
 export async function scheduleTaskNotification(task) {
-  const reminderMinutes = parseInt(task.reminder, 10);
-  const taskTime = new Date(task.date);
-  const notificationTime = new Date(taskTime.getTime() - reminderMinutes * 60000);
+  try {
+    const reminderMinutes = parseInt(task.reminder, 10);
+    const taskTime = new Date(task.date);
+    const notificationTime = new Date(taskTime.getTime() - reminderMinutes * 60000);
 
-  if (isNaN(notificationTime.getTime()) || notificationTime <= new Date()) {
-    console.warn('Некорректное время для уведомления, уведомление не будет создано');
-    return;
+    if (isNaN(notificationTime.getTime()) || notificationTime <= new Date()) {
+      console.warn('Некорректное время для уведомления, уведомление не будет создано');
+      return null;
+    }
+
+    const trigger =
+      task.repeat && task.repeat !== 'none'
+        ? {
+            hour: notificationTime.getHours(),
+            minute: notificationTime.getMinutes(),
+            repeats: true,
+            weekday: task.repeat === 'weekly' ? notificationTime.getDay() : undefined,
+          }
+        : notificationTime;
+
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Напоминание о задаче',
+        body: `${task.title} (${task.status})`,
+      },
+      trigger,
+    });
+
+    return id;
+  } catch (e) {
+    console.error('Ошибка планирования уведомления', e);
+    return null;
   }
+}
 
-  const trigger =
-    task.repeat && task.repeat !== 'none'
-      ? {
-          hour: notificationTime.getHours(),
-          minute: notificationTime.getMinutes(),
-          repeats: true,
-          weekday: task.repeat === 'weekly' ? notificationTime.getDay() : undefined, // для weekly
-        }
-      : notificationTime;
-
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: 'Напоминание о задаче',
-      body: `${task.title} (${task.status})`,
-    },
-    trigger,
-  });
+export async function cancelTaskNotification(id) {
+  try {
+    if (id) {
+      await Notifications.cancelScheduledNotificationAsync(id);
+    }
+  } catch (e) {
+    console.error('Ошибка отмены уведомления', e);
+  }
 }
