@@ -1,12 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { syncTasks } from './supabaseService';
+import { cancelTaskNotification } from './notificationService';
 
 const TASKS_KEY = 'TASKS';
 
 export const getTasks = async () => {
   try {
     const tasks = await AsyncStorage.getItem(TASKS_KEY);
-    return tasks ? JSON.parse(tasks) : [];
+    if (!tasks) return [];
+    try {
+      return JSON.parse(tasks);
+    } catch (e) {
+      console.error('Повреждённые данные задач, сброс', e);
+      await AsyncStorage.removeItem(TASKS_KEY);
+      return [];
+    }
   } catch (error) {
     console.error('Ошибка при загрузке задач', error);
     return [];
@@ -49,6 +57,10 @@ export const updateTask = async (task) => {
 export const deleteTask = async (taskId) => {
   const tasks = await getTasks();
   const filteredTasks = tasks.filter((t) => t.id !== taskId);
+  const deletedTask = tasks.find((t) => t.id === taskId);
+  if (deletedTask?.notificationId) {
+    await cancelTaskNotification(deletedTask.notificationId);
+  }
   await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(filteredTasks));
   await syncTasks(filteredTasks);
 };

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { View, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton } from 'react-native-paper';
 import { saveTask, updateTask } from '../services/storageService';
-import { scheduleTaskNotification } from '../services/notificationService';
+import { scheduleTaskNotification, cancelTaskNotification } from '../services/notificationService';
 
 export default function TaskFormScreen({ navigation, route }) {
   const [title, setTitle] = useState('');
@@ -10,6 +11,8 @@ export default function TaskFormScreen({ navigation, route }) {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [address, setAddress] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [reminderTime, setReminderTime] = useState('10');
@@ -31,20 +34,14 @@ export default function TaskFormScreen({ navigation, route }) {
     }
   }, [editingTask]);
 
-  const isValidDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
-  const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
 
   const handleSave = () => {
     if (!title.trim()) {
       alert('Введите заголовок задачи');
       return;
     }
-    if (!isValidDate(date)) {
-      alert('Введите дату в формате YYYY-MM-DD');
-      return;
-    }
-    if (!isValidTime(time)) {
-      alert('Введите время в формате HH:mm');
+    if (!date || !time) {
+      alert('Выберите дату и время');
       return;
     }
 
@@ -69,7 +66,17 @@ export default function TaskFormScreen({ navigation, route }) {
       reminder: reminderTime,
       repeat,
       category,
+      notificationId: editingTask ? editingTask.notificationId : undefined,
     };
+
+    if (editingTask && editingTask.notificationId) {
+      await cancelTaskNotification(editingTask.notificationId);
+    }
+
+    const id = await scheduleTaskNotification(newTask);
+    if (id) {
+      newTask.notificationId = id;
+    }
 
     if (editingTask) {
       await updateTask(newTask);
@@ -77,20 +84,62 @@ export default function TaskFormScreen({ navigation, route }) {
       await saveTask(newTask);
     }
 
-    await scheduleTaskNotification(newTask);
-
     setDialogVisible(false);
     setSnackbarVisible(true);
 
     setTimeout(() => navigation.goBack(), 1000);
   };
 
+  const onDateChange = (_, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDate(selectedDate.toISOString().split('T')[0]);
+    }
+  };
+
+  const onTimeChange = (_, selectedTime) => {
+    setShowTimePicker(false);
+    if (selectedTime) {
+      const iso = selectedTime.toISOString();
+      setTime(iso.split('T')[1].slice(0, 5));
+    }
+  };
+
   return (
     <View style={{ flex: 1, padding: 16 }}>
       <TextInput label="Заголовок" value={title} onChangeText={setTitle} style={{ marginBottom: 8 }} />
       <TextInput label="Описание" value={description} onChangeText={setDescription} style={{ marginBottom: 8 }} />
-      <TextInput label="Дата (YYYY-MM-DD)" value={date} onChangeText={setDate} style={{ marginBottom: 8 }} />
-      <TextInput label="Время (HH:mm)" value={time} onChangeText={setTime} style={{ marginBottom: 8 }} />
+      <TextInput
+        label="Дата"
+        value={date}
+        showSoftInputOnFocus={false}
+        onPressIn={() => setShowDatePicker(true)}
+        style={{ marginBottom: 8 }}
+      />
+      {showDatePicker && (
+        <DateTimePicker
+          value={date ? new Date(`${date}T00:00:00`) : new Date()}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={onDateChange}
+        />
+      )}
+
+      <TextInput
+        label="Время"
+        value={time}
+        showSoftInputOnFocus={false}
+        onPressIn={() => setShowTimePicker(true)}
+        style={{ marginBottom: 8 }}
+      />
+      {showTimePicker && (
+        <DateTimePicker
+          value={time ? new Date(`1970-01-01T${time}:00`) : new Date()}
+          mode="time"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={onTimeChange}
+        />
+      )}
       <TextInput label="Адрес" value={address} onChangeText={setAddress} style={{ marginBottom: 8 }} />
       <RadioButton.Group onValueChange={setCategory} value={category}>
         <RadioButton.Item label="Работа" value="Работа" />

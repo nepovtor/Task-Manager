@@ -19,6 +19,7 @@
     "expo-auth-session": "^6.2.1",
     "expo-device": "~7.1.4",
     "expo-notifications": "~0.31.4",
+    "@react-native-community/datetimepicker": "^7.3.3",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",

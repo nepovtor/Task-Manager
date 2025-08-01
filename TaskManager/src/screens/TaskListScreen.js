@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, FlatList } from 'react-native';
-import { FAB, Appbar, Menu, Searchbar } from 'react-native-paper';
+import { FAB, Appbar, Menu, Searchbar, Text, Button } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { getTasks } from '../services/storageService';
 import TaskItem from '../components/TaskItem';
@@ -99,18 +99,27 @@ export default function TaskListScreen({ navigation }) {
 
       <TaskWidget tasks={tasks} />
 
-      {/* Список задач */}
-      <FlatList
-        data={tasks}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TaskItem
-            task={item}
-            onPress={() => navigation.navigate('TaskDetail', { task: item })}
-          />
-        )}
-        contentContainerStyle={{ flexGrow: 1 }}
-      />
+      {/* Список задач или пустое состояние */}
+      {tasks.length === 0 ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text>Нет задач</Text>
+          <Button mode="contained" onPress={() => navigation.navigate('TaskForm')} style={{ marginTop: 16 }}>
+            Создать задачу
+          </Button>
+        </View>
+      ) : (
+        <FlatList
+          data={tasks}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TaskItem
+              task={item}
+              onPress={() => navigation.navigate('TaskDetail', { task: item })}
+            />
+          )}
+          contentContainerStyle={{ flexGrow: 1 }}
+        />
+      )}
 
       {/* Кнопка добавления задачи */}
       <FAB
