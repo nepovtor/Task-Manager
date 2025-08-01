@@ -9,6 +9,7 @@ import { TASK_STATUSES } from '../constants';
 import TaskItem from '../components/TaskItem';
 import TaskWidget from '../components/TaskWidget';
 import styles from '../styles/styles';
+import { Divider } from 'react-native-paper';
 
 export default function TaskListScreen({ navigation }) {
   const { tasks: storedTasks, togglePin } = useTasks();
@@ -74,6 +75,7 @@ export default function TaskListScreen({ navigation }) {
       {/* Appbar с меню сортировки */}
       <Appbar.Header>
         <Appbar.Content title={i18n.t('taskList')} />
+        <Appbar.Action icon="cog" onPress={() => navigation.navigate('Settings')} />
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
@@ -133,9 +135,11 @@ export default function TaskListScreen({ navigation }) {
             <TaskItem
               task={item}
               onPress={() => navigation.navigate('TaskDetail', { task: item })}
+              onLongPress={() => navigation.navigate('TaskForm', { task: item })}
               onToggle={() => handleTogglePin(item.id)}
             />
           )}
+          ItemSeparatorComponent={Divider}
           contentContainerStyle={{ flexGrow: 1 }}
         />
       )}

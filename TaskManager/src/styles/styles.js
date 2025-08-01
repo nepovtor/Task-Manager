@@ -3,10 +3,16 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
   item: {
     marginVertical: 4,
+    borderRadius: 12,
+    elevation: 2,
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '500',
+  },
+  secondary: {
+    fontSize: 12,
+    color: '#555',
   },
   fab: {
   position: 'absolute',
