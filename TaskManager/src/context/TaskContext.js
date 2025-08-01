@@ -1,12 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   getTasks,
-  saveTask as saveTaskService,
-  updateTask as updateTaskService,
-  updateTaskStatus as updateTaskStatusService,
-  deleteTask as deleteTaskService,
-  toggleTaskPinned as toggleTaskPinnedService,
+  saveTasksList,
 } from '../services/storageService';
+import { cancelTaskNotification } from '../services/notificationService';
 
 const TaskContext = createContext({
   tasks: [],
@@ -31,29 +28,43 @@ export const TaskProvider = ({ children }) => {
   }, []);
 
   const addTask = async (task) => {
-    await saveTaskService(task);
-    await loadTasks();
+    const newTasks = [...tasks, task];
+    setTasks(newTasks);
+    saveTasksList(newTasks);
   };
 
   const updateTask = async (task) => {
-    await updateTaskService(task);
-    await loadTasks();
+    const newTasks = tasks.map((t) => (t.id === task.id ? task : t));
+    setTasks(newTasks);
+    saveTasksList(newTasks);
   };
 
   const updateStatus = async (id, status) => {
-    await updateTaskStatusService(id, status);
-    await loadTasks();
+    const newTasks = tasks.map((t) =>
+      t.id === id ? { ...t, status } : t
+    );
+    setTasks(newTasks);
+    saveTasksList(newTasks);
   };
 
   const deleteTask = async (id) => {
-    await deleteTaskService(id);
-    await loadTasks();
+    const deleted = tasks.find((t) => t.id === id);
+    const newTasks = tasks.filter((t) => t.id !== id);
+    setTasks(newTasks);
+    if (deleted?.notificationId) {
+      cancelTaskNotification(deleted.notificationId);
+    }
+    saveTasksList(newTasks);
   };
 
   const togglePin = async (id) => {
-    const res = await toggleTaskPinnedService(id);
-    await loadTasks();
-    return res;
+    const newTasks = tasks.map((t) =>
+      t.id === id ? { ...t, pinned: !t.pinned } : t
+    );
+    const updated = newTasks.find((t) => t.id === id);
+    setTasks(newTasks);
+    saveTasksList(newTasks);
+    return updated;
   };
 
   return (
