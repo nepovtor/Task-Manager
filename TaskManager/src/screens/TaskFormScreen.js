@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton } from 'react-native-paper';
+import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton, Switch, Text } from 'react-native-paper';
 import { saveTask, updateTask } from '../services/storageService';
 import { scheduleTaskNotification, cancelTaskNotification } from '../services/notificationService';
 
@@ -16,7 +16,9 @@ export default function TaskFormScreen({ navigation, route }) {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [reminderTime, setReminderTime] = useState('10');
-  const [repeat, setRepeat] = useState('none'); // none | daily | weekly
+  const [repeat, setRepeat] = useState('none'); // none | daily | weekly | custom
+  const [customDays, setCustomDays] = useState('1');
+  const [pinned, setPinned] = useState(false);
   const [category, setCategory] = useState('Работа');
   const editingTask = route.params?.task;
 
@@ -30,7 +32,9 @@ export default function TaskFormScreen({ navigation, route }) {
       setAddress(editingTask.address);
       setReminderTime(editingTask.reminder || '10');
       setRepeat(editingTask.repeat || 'none');
+      setCustomDays(editingTask.customDays ? String(editingTask.customDays) : '1');
       setCategory(editingTask.category || 'Работа');
+      setPinned(editingTask.pinned || false);
     }
   }, [editingTask]);
 
@@ -65,7 +69,9 @@ export default function TaskFormScreen({ navigation, route }) {
       status: editingTask ? editingTask.status : 'В процессе',
       reminder: reminderTime,
       repeat,
+      customDays: repeat === 'custom' ? parseInt(customDays, 10) : undefined,
       category,
+      pinned,
       notificationId: editingTask ? editingTask.notificationId : undefined,
     };
 
@@ -147,6 +153,11 @@ export default function TaskFormScreen({ navigation, route }) {
         <RadioButton.Item label="Личное" value="Личное" />
       </RadioButton.Group>
 
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
+        <Switch value={pinned} onValueChange={setPinned} />
+        <Text style={{ marginLeft: 8 }}>Закрепить</Text>
+      </View>
+
       <Button mode="contained" onPress={handleSave}>
         {editingTask ? 'Обновить' : 'Сохранить'}
       </Button>
@@ -165,7 +176,17 @@ export default function TaskFormScreen({ navigation, route }) {
               <RadioButton.Item label="Не повторять" value="none" />
               <RadioButton.Item label="Каждый день" value="daily" />
               <RadioButton.Item label="Каждую неделю" value="weekly" />
+              <RadioButton.Item label="Кастом" value="custom" />
             </RadioButton.Group>
+            {repeat === 'custom' && (
+              <TextInput
+                label="Интервал (дней)"
+                keyboardType="number-pad"
+                value={customDays}
+                onChangeText={setCustomDays}
+                style={{ marginTop: 8 }}
+              />
+            )}
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={confirmSave}>OK</Button>

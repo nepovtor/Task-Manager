@@ -9,7 +9,8 @@ export const getTasks = async () => {
     const tasks = await AsyncStorage.getItem(TASKS_KEY);
     if (!tasks) return [];
     try {
-      return JSON.parse(tasks);
+      const parsed = JSON.parse(tasks);
+      return parsed.map((t) => ({ pinned: t.pinned ?? false, ...t }));
     } catch (e) {
       console.error('Повреждённые данные задач, сброс', e);
       await AsyncStorage.removeItem(TASKS_KEY);
@@ -52,6 +53,18 @@ export const updateTask = async (task) => {
     await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
     await syncTasks(tasks);
   }
+};
+
+export const toggleTaskPinned = async (taskId) => {
+  const tasks = await getTasks();
+  const index = tasks.findIndex((t) => t.id === taskId);
+  if (index !== -1) {
+    tasks[index].pinned = !tasks[index].pinned;
+    await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+    await syncTasks(tasks);
+    return tasks[index];
+  }
+  return null;
 };
 
 export const deleteTask = async (taskId) => {
