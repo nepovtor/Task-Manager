@@ -9,11 +9,11 @@ const createThemes = (accent) => ({
     colors: {
       ...MD3LightTheme.colors,
       primary: accent,
-      secondary: '#9A82DB',
-      background: '#F4F4F7',
-      surface: '#FFFFFF',
-      onBackground: '#1C1B1F',
-      onSurface: '#1C1B1F',
+      secondary: accent,
+      background: '#FFFFFF',
+      surface: '#F5F5F5',
+      onBackground: '#000000',
+      onSurface: '#000000',
     },
   },
   dark: {
@@ -21,11 +21,11 @@ const createThemes = (accent) => ({
     colors: {
       ...MD3DarkTheme.colors,
       primary: accent,
-      secondary: '#CCC2DC',
-      background: '#1C1B1F',
-      surface: '#2B2A2E',
-      onBackground: '#E6E1E5',
-      onSurface: '#E6E1E5',
+      secondary: accent,
+      background: '#000000',
+      surface: '#121212',
+      onBackground: '#FFFFFF',
+      onSurface: '#FFFFFF',
     },
   },
 });
@@ -35,16 +35,16 @@ const COLOR_KEY = 'ACCENT_COLOR';
 
 const ThemeContext = createContext({
   theme: 'light',
-  paperTheme: createThemes('#6750A4').light,
+  paperTheme: createThemes('#1F2937').light,
   toggleTheme: () => {},
-  accentColor: '#6750A4',
+  accentColor: '#1F2937',
   setAccentColor: () => {},
 });
 
 export const ThemeProvider = ({ children }) => {
   const systemScheme = useColorScheme();
   const [theme, setTheme] = useState(systemScheme || 'light');
-  const [accentColor, setAccentColorState] = useState('#6750A4');
+  const [accentColor, setAccentColorState] = useState('#1F2937');
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((value) => {

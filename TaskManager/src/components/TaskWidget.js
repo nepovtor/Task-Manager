@@ -6,7 +6,7 @@ const TaskWidget = ({ tasks }) => {
   const todaysTasks = tasks.filter((t) => t.date.startsWith(today));
 
   return (
-    <Card style={{ margin: 8 }}>
+    <Card mode="outlined" style={{ margin: 8 }}>
       <Card.Title title="Задачи на сегодня" />
       <Card.Content>
         {todaysTasks.length === 0 && <Text>Нет задач</Text>}
