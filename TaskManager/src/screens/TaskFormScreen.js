@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Markdown from 'react-native-markdown-display';
 import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton, Switch, Text } from 'react-native-paper';
+import styles from '../styles/styles';
 import { useThemePreferences } from '../context/ThemeContext';
 import { useTasks } from '../context/TaskContext';
 import { scheduleTaskNotification, cancelTaskNotification } from '../services/notificationService';
@@ -117,14 +119,31 @@ export default function TaskFormScreen({ navigation, route }) {
 
   return (
     <View style={{ flex: 1, padding: 16, backgroundColor: paperTheme.colors.background }}>
-      <TextInput label="Заголовок" value={title} onChangeText={setTitle} style={{ marginBottom: 8 }} />
-      <TextInput label="Описание" value={description} onChangeText={setDescription} style={{ marginBottom: 8 }} />
       <TextInput
+        mode="outlined"
+        autoFocus
+        autoComplete="off"
+        label="Заголовок"
+        value={title}
+        onChangeText={setTitle}
+        style={styles.input}
+      />
+      <TextInput
+        mode="outlined"
+        label="Описание"
+        value={description}
+        onChangeText={setDescription}
+        multiline
+        style={styles.input}
+      />
+      {description ? <Markdown style={{ marginBottom: 8 }}>{description}</Markdown> : null}
+      <TextInput
+        mode="outlined"
         label="Дата"
         value={date}
         showSoftInputOnFocus={false}
         onPressIn={() => setShowDatePicker(true)}
-        style={{ marginBottom: 8 }}
+        style={styles.input}
       />
       {showDatePicker && (
         <DateTimePicker
@@ -136,11 +155,12 @@ export default function TaskFormScreen({ navigation, route }) {
       )}
 
       <TextInput
+        mode="outlined"
         label="Время"
         value={time}
         showSoftInputOnFocus={false}
         onPressIn={() => setShowTimePicker(true)}
-        style={{ marginBottom: 8 }}
+        style={styles.input}
       />
       {showTimePicker && (
         <DateTimePicker
@@ -150,7 +170,13 @@ export default function TaskFormScreen({ navigation, route }) {
           onChange={onTimeChange}
         />
       )}
-      <TextInput label="Адрес" value={address} onChangeText={setAddress} style={{ marginBottom: 8 }} />
+      <TextInput
+        mode="outlined"
+        label="Адрес"
+        value={address}
+        onChangeText={setAddress}
+        style={styles.input}
+      />
       <RadioButton.Group onValueChange={setCategory} value={category}>
         <RadioButton.Item label="Работа" value="Работа" />
         <RadioButton.Item label="Учёба" value="Учёба" />
