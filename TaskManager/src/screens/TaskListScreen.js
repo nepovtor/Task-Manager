@@ -3,6 +3,7 @@ import { View, FlatList } from 'react-native';
 import { FAB, Appbar, Menu, Searchbar, Text, Button } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { useTasks } from '../context/TaskContext';
+import { useThemePreferences } from '../context/ThemeContext';
 import i18n from '../i18n';
 import { TASK_STATUSES } from '../constants';
 import TaskItem from '../components/TaskItem';
@@ -11,6 +12,7 @@ import styles from '../styles/styles';
 
 export default function TaskListScreen({ navigation }) {
   const { tasks: storedTasks, togglePin } = useTasks();
+  const { theme, toggleTheme } = useThemePreferences();
   const [tasks, setTasks] = useState([]);
   const [menuVisible, setMenuVisible] = useState(false);
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
@@ -102,6 +104,11 @@ export default function TaskListScreen({ navigation }) {
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[1])} title="Завершённые" />
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[2])} title="Отменённые" />
         </Menu>
+        <Appbar.Action
+          icon={theme === 'light' ? 'weather-night' : 'white-balance-sunny'}
+          color="white"
+          onPress={toggleTheme}
+        />
       </Appbar.Header>
 
       <Searchbar
