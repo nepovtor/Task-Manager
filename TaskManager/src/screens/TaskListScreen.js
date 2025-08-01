@@ -83,7 +83,14 @@ export default function TaskListScreen({ navigation }) {
   return (
     <View style={{ flex: 1, backgroundColor: paperTheme.colors.background }}>
       {/* Appbar с меню сортировки */}
-      <Appbar.Header>
+      <Appbar.Header style={{ height: 48 }}>
+        <Appbar.Action
+          icon={theme === 'light' ? 'weather-night' : 'white-balance-sunny'}
+          onPress={() => {
+            toggleTheme();
+            setSnackbar('Тема изменена');
+          }}
+        />
         <Appbar.Content title={i18n.t('taskList')} />
         <Menu
           visible={settingsVisible}
@@ -130,6 +137,28 @@ export default function TaskListScreen({ navigation }) {
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[0])} title="Активные" />
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[1])} title="Завершённые" />
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[2])} title="Отменённые" />
+          <Divider />
+          <Menu.Item title="По месяцам" disabled />
+          <Menu.Item
+            onPress={() => {
+              setSettingsVisible(false);
+              navigation.navigate('MonthTasks', {
+                monthOffset: 0,
+                title: 'Этот месяц',
+              });
+            }}
+            title="Этот месяц"
+          />
+          <Menu.Item
+            onPress={() => {
+              setSettingsVisible(false);
+              navigation.navigate('MonthTasks', {
+                monthOffset: 1,
+                title: 'Следующий месяц',
+              });
+            }}
+            title="Следующий месяц"
+          />
           <Divider />
           <Menu.Item title="Система" disabled />
           <Menu.Item onPress={() => setNotificationsEnabled(!notificationsEnabled)} title={notificationsEnabled ? 'Отключить уведомления' : 'Включить уведомления'} />
