@@ -1,64 +1,24 @@
-import React, { useState } from 'react';
-import { Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Button, Card, IconButton } from 'react-native-paper';
-import { getTasks, saveTasks } from '../services/storageService';
+import React from 'react';
+import { View, Text } from 'react-native';
 import styles from '../styles/styles';
 
-export default function TaskDetailScreen({ route, navigation }) {
-  const { task } = route.params;
-  const [currentTask, setCurrentTask] = useState(task);
-
-  const updateTaskStatus = async (status) => {
-    const tasks = await getTasks();
-    const updatedTasks = tasks.map((t) =>
-      t.id === currentTask.id ? { ...t, status } : t
+const TaskDetailScreen = ({ route }) => {
+  const { task } = route.params || {};
+  if (!task) {
+    return (
+      <View style={styles.container}>
+        <Text>Задача не найдена.</Text>
+      </View>
     );
-    await saveTasks(updatedTasks);
-    setCurrentTask({ ...currentTask, status });
-
-    // Передаём сигнал на обновление в TaskListScreen
-    navigation.navigate('TaskList', { refresh: true });
-  };
-
-  const deleteTask = async () => {
-    Alert.alert('Удалить задачу', 'Вы уверены?', [
-      { text: 'Отмена', style: 'cancel' },
-      {
-        text: 'Удалить',
-        style: 'destructive',
-        onPress: async () => {
-          const tasks = await getTasks();
-          const updatedTasks = tasks.filter((t) => t.id !== currentTask.id);
-          await saveTasks(updatedTasks);
-
-          navigation.navigate('TaskList', { refresh: true });
-        },
-      },
-    ]);
-  };
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Card>
-        <Card.Content>
-          <Text style={styles.detailTitle}>{currentTask.title}</Text>
-          <Text>Описание: {currentTask.description}</Text>
-          <Text>Дата и время: {currentTask.date}</Text>
-          <Text>Адрес: {currentTask.address}</Text>
-          <Text>Статус: {currentTask.status}</Text>
-        </Card.Content>
-      </Card>
-
-      <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 16 }}>
-        <IconButton icon="check" onPress={() => updateTaskStatus('Завершена')} />
-        <IconButton icon="progress-clock" onPress={() => updateTaskStatus('В процессе')} />
-        <IconButton icon="close" onPress={() => updateTaskStatus('Отменена')} />
-      </View>
-
-      <Button mode="contained" onPress={deleteTask} style={styles.deleteButton}>
-        Удалить
-      </Button>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.title}>{task.title}</Text>
+      <Text>Дата: {task.date}</Text>
+      <Text>Статус: {task.status}</Text>
+    </View>
   );
-}
+};
+
+export default TaskDetailScreen;

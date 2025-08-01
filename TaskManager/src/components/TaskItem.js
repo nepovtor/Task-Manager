@@ -1,30 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Checkbox } from 'react-native-paper';
+import { TouchableOpacity, View, Text, Button } from 'react-native';
+import styles from '../styles/styles';
 
-const TaskItem = ({ task, onToggle }) => {
-  return (
-    <View style={styles.container}>
-      <Checkbox
-        status={task.completed ? 'checked' : 'unchecked'}
-        onPress={() => onToggle(task.id)}
-      />
-      <Text style={styles.text}>{task.title}</Text>
+const TaskItem = ({ task, navigation, onToggle }) => (
+  <TouchableOpacity
+    style={styles.item}
+    onPress={() => navigation.navigate('TaskDetail', { task })}
+  >
+    <View>
+      <Text style={styles.title}>{task.title}</Text>
+      <Text>{task.date}</Text>
+      <Text>{task.status}</Text>
     </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
-  },
-  text: {
-    fontSize: 16,
-  },
-});
+    <Button title="Сменить статус" onPress={onToggle} />
+  </TouchableOpacity>
+);
 
 export default TaskItem;

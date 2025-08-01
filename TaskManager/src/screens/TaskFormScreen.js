@@ -1,46 +1,54 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { TextInput, Button } from 'react-native-paper';
-import { getTasks, saveTasks } from '../services/storageService';
+import { View, TextInput, Button, Alert } from 'react-native';
+import storageService from '../services/storageService';
 import styles from '../styles/styles';
 
-export default function TaskFormScreen({ navigation }) {
+const TaskFormScreen = ({ navigation }) => {
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
-  const [address, setAddress] = useState('');
+  const [status, setStatus] = useState('В процессе');
 
-  const saveTask = async () => {
+  const handleSave = async () => {
     if (!title.trim()) {
-      Alert.alert('Ошибка', 'Введите заголовок задачи');
+      Alert.alert('Ошибка', 'Название задачи не может быть пустым!');
       return;
     }
-
-    const newTask = {
-      id: Date.now().toString(),
-      title,
-      description,
-      date,
-      address,
-      status: 'В процессе',
-    };
-
-    const tasks = (await getTasks()) || [];
-    tasks.push(newTask);
-    await saveTasks(tasks);
-    navigation.goBack();
+    if (isNaN(Date.parse(date))) {
+      Alert.alert('Ошибка', 'Введите корректную дату!');
+      return;
+    }
+    try {
+      const newTask = {
+        id: Date.now(),
+        title,
+        date,
+        status,
+      };
+      const tasks = await storageService.getTasks();
+      await storageService.saveTasks([...tasks, newTask]);
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Ошибка', 'Не удалось сохранить задачу');
+    }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <TextInput label="Заголовок" value={title} onChangeText={setTitle} style={styles.input} />
-      <TextInput label="Описание" value={description} onChangeText={setDescription} style={styles.input} />
-      <TextInput label="Дата и время" value={date} onChangeText={setDate} style={styles.input} />
-      <TextInput label="Адрес" value={address} onChangeText={setAddress} style={styles.input} />
-      <Button mode="contained" onPress={saveTask} style={styles.saveButton}>
-        Сохранить
-      </Button>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <TextInput
+        style={styles.input}
+        placeholder="Название задачи"
+        value={title}
+        onChangeText={setTitle}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Дата и время (YYYY-MM-DD HH:mm)"
+        value={date}
+        onChangeText={setDate}
+      />
+      <Button title="Сохранить" onPress={handleSave} />
+    </View>
   );
-}
+};
+
+export default TaskFormScreen;
