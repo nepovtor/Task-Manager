@@ -25,7 +25,16 @@ export default function TaskDetailScreen({ route, navigation }) {
       <Text>{currentTask.description}</Text>
       <Text>Дата: {currentTask.date}</Text>
       <Text>Адрес: {currentTask.address}</Text>
+      <Text>Категория: {currentTask.category}</Text>
       <Text>Статус: {currentTask.status}</Text>
+
+      <Button
+        mode="contained"
+        onPress={() => navigation.navigate('TaskForm', { task: currentTask })}
+        style={{ marginVertical: 8 }}
+      >
+        Редактировать
+      </Button>
 
       <Button mode="contained" onPress={handleStatusChange} style={{ marginVertical: 8 }}>
         Изменить статус

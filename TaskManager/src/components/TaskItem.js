@@ -10,6 +10,7 @@ const TaskItem = ({ task, navigation, onToggle }) => (
     <View>
       <Text style={styles.title}>{task.title}</Text>
       <Text>{task.date}</Text>
+      <Text>{task.category}</Text>
       <Text>{task.status}</Text>
     </View>
     <Button title="Сменить статус" onPress={onToggle} />

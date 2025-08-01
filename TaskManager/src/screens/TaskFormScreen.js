@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton } from 'react-native-paper';
-import { saveTask } from '../services/storageService';
+import { saveTask, updateTask } from '../services/storageService';
 import { scheduleTaskNotification } from '../services/notificationService';
 
-export default function TaskFormScreen({ navigation }) {
+export default function TaskFormScreen({ navigation, route }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -14,6 +14,22 @@ export default function TaskFormScreen({ navigation }) {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [reminderTime, setReminderTime] = useState('10');
   const [repeat, setRepeat] = useState('none'); // none | daily | weekly
+  const [category, setCategory] = useState('Работа');
+  const editingTask = route.params?.task;
+
+  useEffect(() => {
+    if (editingTask) {
+      setTitle(editingTask.title);
+      setDescription(editingTask.description);
+      const dateObj = new Date(editingTask.date);
+      setDate(dateObj.toISOString().split('T')[0]);
+      setTime(dateObj.toISOString().split('T')[1].slice(0,5));
+      setAddress(editingTask.address);
+      setReminderTime(editingTask.reminder || '10');
+      setRepeat(editingTask.repeat || 'none');
+      setCategory(editingTask.category || 'Работа');
+    }
+  }, [editingTask]);
 
   const isValidDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
   const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
@@ -43,19 +59,24 @@ export default function TaskFormScreen({ navigation }) {
 
   const confirmSave = async () => {
     const taskDateTime = new Date(`${date}T${time}:00`);
-
     const newTask = {
-      id: Date.now().toString(),
+      id: editingTask ? editingTask.id : Date.now().toString(),
       title,
       description,
       date: taskDateTime.toISOString(),
       address,
-      status: 'В процессе',
+      status: editingTask ? editingTask.status : 'В процессе',
       reminder: reminderTime,
-      repeat, // новое поле
+      repeat,
+      category,
     };
 
-    await saveTask(newTask);
+    if (editingTask) {
+      await updateTask(newTask);
+    } else {
+      await saveTask(newTask);
+    }
+
     await scheduleTaskNotification(newTask);
 
     setDialogVisible(false);
@@ -71,8 +92,15 @@ export default function TaskFormScreen({ navigation }) {
       <TextInput label="Дата (YYYY-MM-DD)" value={date} onChangeText={setDate} style={{ marginBottom: 8 }} />
       <TextInput label="Время (HH:mm)" value={time} onChangeText={setTime} style={{ marginBottom: 8 }} />
       <TextInput label="Адрес" value={address} onChangeText={setAddress} style={{ marginBottom: 8 }} />
+      <RadioButton.Group onValueChange={setCategory} value={category}>
+        <RadioButton.Item label="Работа" value="Работа" />
+        <RadioButton.Item label="Учёба" value="Учёба" />
+        <RadioButton.Item label="Личное" value="Личное" />
+      </RadioButton.Group>
 
-      <Button mode="contained" onPress={handleSave}>Сохранить</Button>
+      <Button mode="contained" onPress={handleSave}>
+        {editingTask ? 'Обновить' : 'Сохранить'}
+      </Button>
 
       <Portal>
         <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
@@ -96,8 +124,12 @@ export default function TaskFormScreen({ navigation }) {
         </Dialog>
       </Portal>
 
-      <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={1500}>
-        Задача сохранена!
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={1500}
+      >
+        {editingTask ? 'Задача обновлена!' : 'Задача сохранена!'}
       </Snackbar>
     </View>
   );
