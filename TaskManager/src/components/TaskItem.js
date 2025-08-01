@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import { Card, IconButton, Badge, Avatar } from 'react-native-paper';
+import { View } from 'react-native';
+import { Card, IconButton, Badge, Avatar, Text } from 'react-native-paper';
 import styles from '../styles/styles';
 import formatDate from '../utils/formatDate';
 

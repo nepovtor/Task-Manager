@@ -5,6 +5,7 @@ import TaskListScreen from '../screens/TaskListScreen';
 import TaskFormScreen from '../screens/TaskFormScreen';
 import TaskDetailScreen from '../screens/TaskDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import AboutScreen from '../screens/AboutScreen';
 import i18n from '../i18n';
 
 const Stack = createStackNavigator();
@@ -23,6 +24,7 @@ export default function AppNavigator() {
         />
         <Stack.Screen name="TaskDetail" component={TaskDetailScreen} options={{ title: i18n.t('taskDetails') }} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: i18n.t('settings') }} />
+        <Stack.Screen name="About" component={AboutScreen} options={{ title: 'О приложении' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

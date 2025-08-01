@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, FlatList } from 'react-native';
-import { FAB, Appbar, Menu, Searchbar, Text, Button } from 'react-native-paper';
+import { FAB, Appbar, Menu, Searchbar, Text, Button, Divider } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { useTasks } from '../context/TaskContext';
 import { useThemePreferences } from '../context/ThemeContext';
@@ -9,17 +9,17 @@ import { TASK_STATUSES } from '../constants';
 import TaskItem from '../components/TaskItem';
 import TaskWidget from '../components/TaskWidget';
 import styles from '../styles/styles';
-import { Divider } from 'react-native-paper';
 
 export default function TaskListScreen({ navigation }) {
   const { tasks: storedTasks, togglePin } = useTasks();
   const { theme, toggleTheme, paperTheme } = useThemePreferences();
   const [tasks, setTasks] = useState([]);
-  const [menuVisible, setMenuVisible] = useState(false);
-  const [filterMenuVisible, setFilterMenuVisible] = useState(false);
+  const [settingsVisible, setSettingsVisible] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [sortType, setSortType] = useState('date'); // date | status
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [language, setLanguage] = useState(i18n.locale);
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -55,12 +55,12 @@ export default function TaskListScreen({ navigation }) {
   const changeSort = (type) => {
     setSortType(type);
     setTasks(sortTasks(tasks, type));
-    setMenuVisible(false);
+    setSettingsVisible(false);
   };
 
   const changeFilter = (status) => {
     setFilterStatus(status);
-    setFilterMenuVisible(false);
+    setSettingsVisible(false);
   };
 
   const handleTogglePin = async (id) => {
@@ -75,39 +75,25 @@ export default function TaskListScreen({ navigation }) {
       {/* Appbar с меню сортировки */}
       <Appbar.Header>
         <Appbar.Content title={i18n.t('taskList')} />
-        <Appbar.Action icon="cog" onPress={() => navigation.navigate('Settings')} />
         <Menu
-          visible={menuVisible}
-          onDismiss={() => setMenuVisible(false)}
-          anchor={
-            <Appbar.Action
-              icon="sort"
-              onPress={() => setMenuVisible(true)}
-            />
-          }
+          visible={settingsVisible}
+          onDismiss={() => setSettingsVisible(false)}
+          anchor={<Appbar.Action icon="hexagon-outline" onPress={() => setSettingsVisible(true)} />}
         >
           <Menu.Item onPress={() => changeSort('date')} title="Сортировать по дате" />
           <Menu.Item onPress={() => changeSort('status')} title="Сортировать по статусу" />
-        </Menu>
-        <Menu
-          visible={filterMenuVisible}
-          onDismiss={() => setFilterMenuVisible(false)}
-          anchor={
-            <Appbar.Action
-              icon="filter"
-              onPress={() => setFilterMenuVisible(true)}
-            />
-          }
-        >
+          <Divider />
           <Menu.Item onPress={() => changeFilter('all')} title="Все" />
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[0])} title="Активные" />
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[1])} title="Завершённые" />
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[2])} title="Отменённые" />
+          <Divider />
+          <Menu.Item onPress={toggleTheme} title={theme === 'light' ? 'Тёмная тема' : 'Светлая тема'} />
+          <Menu.Item onPress={() => setNotificationsEnabled(!notificationsEnabled)} title={notificationsEnabled ? 'Отключить уведомления' : 'Включить уведомления'} />
+          <Menu.Item onPress={() => { const lang = language === 'ru' ? 'en' : 'ru'; i18n.locale = lang; setLanguage(lang); }} title={language === 'ru' ? 'Switch to English' : 'Переключить на русский'} />
+          <Menu.Item onPress={() => { setSettingsVisible(false); navigation.navigate('About'); }} title="О приложении" />
+          <Menu.Item onPress={() => { setSettingsVisible(false); navigation.navigate('Settings'); }} title="Расширенные настройки" />
         </Menu>
-        <Appbar.Action
-          icon={theme === 'light' ? 'weather-night' : 'white-balance-sunny'}
-          onPress={toggleTheme}
-        />
       </Appbar.Header>
 
       <Searchbar
