@@ -4,10 +4,13 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import AppNavigator from './src/navigation/AppNavigator';
 import { registerForPushNotificationsAsync } from './src/services/notificationService';
 import { TaskProvider } from './src/context/TaskContext';
+import { ThemeProvider, useThemePreferences } from './src/context/ThemeContext';
 import SignInScreen from './src/screens/SignInScreen';
 
-export default function App() {
+function MainApp() {
   const [user, setUser] = useState(null);
+  const { paperTheme } = useThemePreferences();
+
   useEffect(() => {
     // Запрос разрешений на уведомления
     registerForPushNotificationsAsync();
@@ -23,10 +26,18 @@ export default function App() {
   }, []);
 
   return (
-    <PaperProvider>
+    <PaperProvider theme={paperTheme}>
       <TaskProvider>
         {user ? <AppNavigator /> : <SignInScreen onSignIn={setUser} />}
       </TaskProvider>
     </PaperProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <MainApp />
+    </ThemeProvider>
   );
 }
