@@ -34,46 +34,64 @@ export const saveTask = async (task) => {
 };
 
 export const updateTaskStatus = async (taskId, newStatus) => {
-  const tasks = await getTasks();
-  const index = tasks.findIndex((t) => t.id === taskId);
-  if (index !== -1) {
-    tasks[index].status = newStatus;
-    await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-    await syncTasks(tasks);
-    return tasks[index];
+  try {
+    const tasks = await getTasks();
+    const index = tasks.findIndex((t) => t.id === taskId);
+    if (index !== -1) {
+      tasks[index].status = newStatus;
+      await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+      await syncTasks(tasks);
+      return tasks[index];
+    }
+    return null;
+  } catch (error) {
+    console.error('Ошибка при обновлении статуса задачи', error);
+    return null;
   }
-  return null;
 };
 
 export const updateTask = async (task) => {
-  const tasks = await getTasks();
-  const index = tasks.findIndex((t) => t.id === task.id);
-  if (index !== -1) {
-    tasks[index] = task;
-    await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-    await syncTasks(tasks);
+  try {
+    const tasks = await getTasks();
+    const index = tasks.findIndex((t) => t.id === task.id);
+    if (index !== -1) {
+      tasks[index] = task;
+      await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+      await syncTasks(tasks);
+    }
+  } catch (error) {
+    console.error('Ошибка при обновлении задачи', error);
   }
 };
 
 export const toggleTaskPinned = async (taskId) => {
-  const tasks = await getTasks();
-  const index = tasks.findIndex((t) => t.id === taskId);
-  if (index !== -1) {
-    tasks[index].pinned = !tasks[index].pinned;
-    await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-    await syncTasks(tasks);
-    return tasks[index];
+  try {
+    const tasks = await getTasks();
+    const index = tasks.findIndex((t) => t.id === taskId);
+    if (index !== -1) {
+      tasks[index].pinned = !tasks[index].pinned;
+      await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+      await syncTasks(tasks);
+      return tasks[index];
+    }
+    return null;
+  } catch (error) {
+    console.error('Ошибка при изменении закрепления задачи', error);
+    return null;
   }
-  return null;
 };
 
 export const deleteTask = async (taskId) => {
-  const tasks = await getTasks();
-  const filteredTasks = tasks.filter((t) => t.id !== taskId);
-  const deletedTask = tasks.find((t) => t.id === taskId);
-  if (deletedTask?.notificationId) {
-    await cancelTaskNotification(deletedTask.notificationId);
+  try {
+    const tasks = await getTasks();
+    const filteredTasks = tasks.filter((t) => t.id !== taskId);
+    const deletedTask = tasks.find((t) => t.id === taskId);
+    if (deletedTask?.notificationId) {
+      await cancelTaskNotification(deletedTask.notificationId);
+    }
+    await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(filteredTasks));
+    await syncTasks(filteredTasks);
+  } catch (error) {
+    console.error('Ошибка при удалении задачи', error);
   }
-  await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(filteredTasks));
-  await syncTasks(filteredTasks);
 };

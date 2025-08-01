@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton, Switch, Text } from 'react-native-paper';
-import { saveTask, updateTask } from '../services/storageService';
+import { useTasks } from '../context/TaskContext';
 import { scheduleTaskNotification, cancelTaskNotification } from '../services/notificationService';
+import { TASK_STATUSES } from '../constants';
 
 export default function TaskFormScreen({ navigation, route }) {
+  const { addTask, updateTask } = useTasks();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -66,7 +68,7 @@ export default function TaskFormScreen({ navigation, route }) {
       description,
       date: taskDateTime.toISOString(),
       address,
-      status: editingTask ? editingTask.status : 'В процессе',
+      status: editingTask ? editingTask.status : TASK_STATUSES[0],
       reminder: reminderTime,
       repeat,
       customDays: repeat === 'custom' ? parseInt(customDays, 10) : undefined,
@@ -87,7 +89,7 @@ export default function TaskFormScreen({ navigation, route }) {
     if (editingTask) {
       await updateTask(newTask);
     } else {
-      await saveTask(newTask);
+      await addTask(newTask);
     }
 
     setDialogVisible(false);
