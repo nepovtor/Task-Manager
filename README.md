@@ -21,6 +21,9 @@
 - 📱 **Адаптивный дизайн** - оптимизировано для всех размеров экранов
 - 🛡️ **Поддержка Safe Area** - корректное отображение на устройствах с вырезами
 - ⚡ **Быстрая навигация** - плавные переходы между экранами
+- ☁️ **Синхронизация через Supabase** - облачное хранение задач
+- 🔑 **Авторизация через Google** - вход с помощью Expo Auth Session
+- 🔔 **Push-уведомления** - напоминания о предстоящих задачах
 
 ## 🏗️ Архитектура проекта
 
@@ -32,9 +35,13 @@ TaskManager/
 │   ├── screens/             # Экраны приложения
 │   │   ├── TaskListScreen.js    # Список задач
 │   │   ├── TaskFormScreen.js    # Создание/редактирование
-│   │   └── TaskDetailScreen.js  # Детали задачи
+│   │   ├── TaskDetailScreen.js  # Детали задачи
+│   │   └── SignInScreen.js      # Вход пользователя
 │   ├── services/            # Сервисы
-│   │   └── storageService.js    # Работа с локальным хранилищем
+│   │   ├── storageService.js    # Работа с локальным хранилищем
+│   │   ├── authService.js       # Авторизация
+│   │   ├── notificationService.js # Push-уведомления
+│   │   └── supabaseService.js   # Синхронизация с облаком
 │   └── styles/              # Стили приложения
 ├── App.js                   # Точка входа
 ├── package.json            # Зависимости
@@ -51,6 +58,9 @@ TaskManager/
 | **React Native Paper** | ^5.12.3 | UI компоненты |
 | **AsyncStorage** | ^1.21.0 | Локальное хранение |
 | **React Native Reanimated** | ~3.10.0 | Анимации |
+| **Expo Notifications** | ~0.31.4 | Push-уведомления |
+| **Expo Auth Session** | ^6.2.1 | Авторизация через Google |
+| **Supabase JS** | ^2.53.0 | Синхронизация данных |
 
 ## 🚀 Быстрый старт
 
@@ -168,6 +178,8 @@ npm run lint
 ```env
 EXPO_PUBLIC_API_URL=your_api_url_here
 EXPO_PUBLIC_APP_VERSION=1.0.0
+EXPO_PUBLIC_SUPABASE_URL=https://your-supabase-url.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 ## 📚 Полезные команды
