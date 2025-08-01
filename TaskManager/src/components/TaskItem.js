@@ -59,7 +59,7 @@ const TaskItem = ({ task, onPress, onToggle, onLongPress }) => (
           <Text style={styles.title}>{task.title}</Text>
           <Text style={styles.secondary}>{formatDate(task.date)}</Text>
           <Text style={styles.secondary}>{task.category}</Text>
-          <Badge style={{ backgroundColor: badgeColor(task.status), alignSelf: 'flex-start', marginTop: 4 }}>
+          <Badge style={{ backgroundColor: badgeColor(task.status), alignSelf: 'flex-start', marginTop: 4, color: 'white' }}>
             {task.status}
           </Badge>
         </View>
