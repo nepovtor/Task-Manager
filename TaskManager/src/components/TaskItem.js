@@ -51,7 +51,7 @@ const categoryIcon = (category) => {
 };
 
 const TaskItem = ({ task, onPress, onToggle, onLongPress }) => (
-  <Card style={styles.item} onPress={onPress} onLongPress={onLongPress} mode="elevated">
+  <Card style={styles.item} onPress={onPress} onLongPress={onLongPress} mode="outlined">
     <Card.Content style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Avatar.Icon size={32} icon={categoryIcon(task.category)} style={{ marginRight: 8 }} />
