@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton } from 'react-native-paper';
-import { saveTask } from '../services/storageService';
+import { saveTask, updateTask } from '../services/storageService';
 import { scheduleTaskNotification } from '../services/notificationService';
 
-export default function TaskFormScreen({ navigation }) {
+export default function TaskFormScreen({ navigation, route }) {
+  const existingTask = route.params?.task;
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -14,6 +15,19 @@ export default function TaskFormScreen({ navigation }) {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [reminderTime, setReminderTime] = useState('10');
   const [repeat, setRepeat] = useState('none'); // none | daily | weekly
+
+  useEffect(() => {
+    if (existingTask) {
+      const taskDate = new Date(existingTask.date);
+      setTitle(existingTask.title);
+      setDescription(existingTask.description);
+      setDate(taskDate.toISOString().split('T')[0]);
+      setTime(taskDate.toTimeString().slice(0, 5));
+      setAddress(existingTask.address);
+      setReminderTime(existingTask.reminder || '10');
+      setRepeat(existingTask.repeat || 'none');
+    }
+  }, [existingTask]);
 
   const isValidDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
   const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
@@ -44,19 +58,32 @@ export default function TaskFormScreen({ navigation }) {
   const confirmSave = async () => {
     const taskDateTime = new Date(`${date}T${time}:00`);
 
-    const newTask = {
-      id: Date.now().toString(),
-      title,
-      description,
-      date: taskDateTime.toISOString(),
-      address,
-      status: 'В процессе',
-      reminder: reminderTime,
-      repeat, // новое поле
-    };
-
-    await saveTask(newTask);
-    await scheduleTaskNotification(newTask);
+    if (existingTask) {
+      const updatedTask = {
+        ...existingTask,
+        title,
+        description,
+        date: taskDateTime.toISOString(),
+        address,
+        reminder: reminderTime,
+        repeat,
+      };
+      await updateTask(updatedTask);
+      await scheduleTaskNotification(updatedTask);
+    } else {
+      const newTask = {
+        id: Date.now().toString(),
+        title,
+        description,
+        date: taskDateTime.toISOString(),
+        address,
+        status: 'В процессе',
+        reminder: reminderTime,
+        repeat,
+      };
+      await saveTask(newTask);
+      await scheduleTaskNotification(newTask);
+    }
 
     setDialogVisible(false);
     setSnackbarVisible(true);

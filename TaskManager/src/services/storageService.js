@@ -33,6 +33,26 @@ export const updateTaskStatus = async (taskId, newStatus) => {
   return null;
 };
 
+export const updateTask = async (updatedTask) => {
+  try {
+    const tasks = await getTasks();
+    const index = tasks.findIndex((t) => t.id === updatedTask.id);
+    if (index !== -1) {
+      tasks[index] = { ...tasks[index], ...updatedTask };
+      await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+      return tasks[index];
+    }
+  } catch (error) {
+    console.error('Ошибка при обновлении задачи', error);
+  }
+  return null;
+};
+
+export const getTaskById = async (taskId) => {
+  const tasks = await getTasks();
+  return tasks.find((t) => t.id === taskId);
+};
+
 export const deleteTask = async (taskId) => {
   const tasks = await getTasks();
   const filteredTasks = tasks.filter((t) => t.id !== taskId);

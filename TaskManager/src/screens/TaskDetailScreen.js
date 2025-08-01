@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Text, Button } from 'react-native-paper';
-import { updateTaskStatus, deleteTask } from '../services/storageService';
+import { useFocusEffect } from '@react-navigation/native';
+import { updateTaskStatus, deleteTask, getTaskById } from '../services/storageService';
 
 export default function TaskDetailScreen({ route, navigation }) {
   const { task } = route.params;
   const [currentTask, setCurrentTask] = useState(task);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadTask = async () => {
+        const freshTask = await getTaskById(task.id);
+        if (freshTask) {
+          setCurrentTask(freshTask);
+        }
+      };
+      loadTask();
+    }, [task.id])
+  );
 
   const handleStatusChange = async () => {
     const statuses = ['В процессе', 'Завершена', 'Отменена'];
@@ -29,6 +42,14 @@ export default function TaskDetailScreen({ route, navigation }) {
 
       <Button mode="contained" onPress={handleStatusChange} style={{ marginVertical: 8 }}>
         Изменить статус
+      </Button>
+
+      <Button
+        mode="contained"
+        onPress={() => navigation.navigate('TaskForm', { task: currentTask })}
+        style={{ marginVertical: 8 }}
+      >
+        Редактировать
       </Button>
 
       <Button mode="contained" onPress={handleDelete} buttonColor="red">
