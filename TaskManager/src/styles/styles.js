@@ -9,12 +9,14 @@ export default StyleSheet.create({
     elevation: 0,
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '500',
+    fontFamily: 'Inter_500Medium',
   },
   secondary: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#777',
+    fontFamily: 'Inter_400Regular',
   },
   fab: {
   position: 'absolute',
@@ -38,6 +40,7 @@ export default StyleSheet.create({
   },
   input: {
     marginBottom: 12,
+    borderRadius: 8,
   },
   addButton: {
     marginTop: 16,
@@ -49,8 +52,9 @@ export default StyleSheet.create({
     marginTop: 16,
   },
   detailTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '500',
+    fontFamily: 'RobotoFlex_500Medium',
     marginBottom: 12,
   },
 });
