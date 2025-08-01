@@ -1,6 +1,19 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
+  item: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    marginVertical: 4,
+    backgroundColor: '#fff',
+    borderRadius: 4,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
   fab: {
   position: 'absolute',
   margin: 16,
