@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { Provider as PaperProvider } from 'react-native-paper';
 import AppNavigator from './src/navigation/AppNavigator';
 import { registerForPushNotificationsAsync } from './src/services/notificationService';
+import { TaskProvider } from './src/context/TaskContext';
 import SignInScreen from './src/screens/SignInScreen';
 
 export default function App() {
@@ -23,11 +24,9 @@ export default function App() {
 
   return (
     <PaperProvider>
-      {user ? (
-        <AppNavigator />
-      ) : (
-        <SignInScreen onSignIn={setUser} />
-      )}
+      <TaskProvider>
+        {user ? <AppNavigator /> : <SignInScreen onSignIn={setUser} />}
+      </TaskProvider>
     </PaperProvider>
   );
 }

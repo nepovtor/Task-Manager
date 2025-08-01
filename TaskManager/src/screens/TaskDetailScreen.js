@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Text, Button } from 'react-native-paper';
-import { updateTaskStatus, deleteTask } from '../services/storageService';
+import { useTasks } from '../context/TaskContext';
+import { TASK_STATUSES } from '../constants';
 
 export default function TaskDetailScreen({ route, navigation }) {
+  const { updateStatus, deleteTask } = useTasks();
   const { task } = route.params;
   const [currentTask, setCurrentTask] = useState(task);
 
   const handleStatusChange = async () => {
-    const statuses = ['В процессе', 'Завершена', 'Отменена'];
-    const nextStatus = statuses[(statuses.indexOf(currentTask.status) + 1) % statuses.length];
-    const updatedTask = await updateTaskStatus(currentTask.id, nextStatus);
-    setCurrentTask(updatedTask);
+    const nextStatus = TASK_STATUSES[(TASK_STATUSES.indexOf(currentTask.status) + 1) % TASK_STATUSES.length];
+    await updateStatus(currentTask.id, nextStatus);
+    setCurrentTask((prev) => ({ ...prev, status: nextStatus }));
   };
 
   const handleDelete = async () => {

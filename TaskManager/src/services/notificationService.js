@@ -3,21 +3,25 @@ import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 
 export async function registerForPushNotificationsAsync() {
-  if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
+  try {
+    if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
 
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
 
-    if (finalStatus !== 'granted') {
-      alert('Не удалось получить разрешение на отправку уведомлений.');
-      return;
+      if (finalStatus !== 'granted') {
+        alert('Не удалось получить разрешение на отправку уведомлений.');
+        return;
+      }
+    } else {
+      alert('Push-уведомления доступны только на реальных устройствах.');
     }
-  } else {
-    alert('Push-уведомления доступны только на реальных устройствах.');
+  } catch (e) {
+    console.error('Ошибка регистрации уведомлений', e);
   }
 }
 

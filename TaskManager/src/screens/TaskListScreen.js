@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { View, FlatList } from 'react-native';
 import { FAB, Appbar, Menu, Searchbar, Text, Button } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
-import { getTasks, toggleTaskPinned } from '../services/storageService';
+import { useTasks } from '../context/TaskContext';
+import i18n from '../i18n';
+import { TASK_STATUSES } from '../constants';
 import TaskItem from '../components/TaskItem';
 import TaskWidget from '../components/TaskWidget';
 import styles from '../styles/styles';
 
 export default function TaskListScreen({ navigation }) {
+  const { tasks: storedTasks, togglePin } = useTasks();
   const [tasks, setTasks] = useState([]);
   const [menuVisible, setMenuVisible] = useState(false);
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
@@ -18,12 +21,11 @@ export default function TaskListScreen({ navigation }) {
 
   useEffect(() => {
     if (isFocused) {
-      loadTasks();
+      updateList();
     }
-  }, [isFocused, filterStatus, searchQuery]);
+  }, [isFocused, filterStatus, searchQuery, storedTasks]);
 
-  const loadTasks = async () => {
-    const storedTasks = await getTasks();
+  const updateList = () => {
     let list = storedTasks || [];
     if (filterStatus !== 'all') {
       list = list.filter((t) => t.status === filterStatus);
@@ -59,11 +61,9 @@ export default function TaskListScreen({ navigation }) {
   };
 
   const handleTogglePin = async (id) => {
-    const updated = await toggleTaskPinned(id);
+    const updated = await togglePin(id);
     if (updated) {
-      setTasks((prev) =>
-        sortTasks(prev.map((t) => (t.id === id ? updated : t)), sortType)
-      );
+      setTasks((prev) => sortTasks(prev.map((t) => (t.id === id ? updated : t)), sortType));
     }
   };
 
@@ -71,7 +71,7 @@ export default function TaskListScreen({ navigation }) {
     <View style={{ flex: 1 }}>
       {/* Appbar с меню сортировки */}
       <Appbar.Header>
-        <Appbar.Content title="Список задач" />
+        <Appbar.Content title={i18n.t('taskList')} />
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
@@ -98,14 +98,14 @@ export default function TaskListScreen({ navigation }) {
           }
         >
           <Menu.Item onPress={() => changeFilter('all')} title="Все" />
-          <Menu.Item onPress={() => changeFilter('В процессе')} title="Активные" />
-          <Menu.Item onPress={() => changeFilter('Завершена')} title="Завершённые" />
-          <Menu.Item onPress={() => changeFilter('Отменена')} title="Отменённые" />
+          <Menu.Item onPress={() => changeFilter(TASK_STATUSES[0])} title="Активные" />
+          <Menu.Item onPress={() => changeFilter(TASK_STATUSES[1])} title="Завершённые" />
+          <Menu.Item onPress={() => changeFilter(TASK_STATUSES[2])} title="Отменённые" />
         </Menu>
       </Appbar.Header>
 
       <Searchbar
-        placeholder="Поиск"
+        placeholder={i18n.t('search', { defaultValue: 'Поиск' })}
         value={searchQuery}
         onChangeText={setSearchQuery}
         style={{ margin: 8 }}
@@ -116,9 +116,9 @@ export default function TaskListScreen({ navigation }) {
       {/* Список задач или пустое состояние */}
       {tasks.length === 0 ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Text>Нет задач</Text>
+          <Text>{i18n.t('noTasks')}</Text>
           <Button mode="contained" onPress={() => navigation.navigate('TaskForm')} style={{ marginTop: 16 }}>
-            Создать задачу
+            {i18n.t('createTask')}
           </Button>
         </View>
       ) : (
