@@ -5,6 +5,7 @@ import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
 const systemFont = Platform.select({ ios: 'System', android: 'sans-serif' });
 const baseFonts = {};
+const DEFAULT_ACCENT = Platform.select({ ios: '#007AFF', android: '#6200EE', default: '#1F2937' });
 Object.keys(MD3LightTheme.fonts).forEach((k) => {
   baseFonts[k] = { ...MD3LightTheme.fonts[k], fontFamily: systemFont };
 });
@@ -43,16 +44,16 @@ const COLOR_KEY = 'ACCENT_COLOR';
 
 const ThemeContext = createContext({
   theme: 'light',
-  paperTheme: createThemes('#1F2937').light,
+  paperTheme: createThemes(DEFAULT_ACCENT).light,
   toggleTheme: () => {},
-  accentColor: '#1F2937',
+  accentColor: DEFAULT_ACCENT,
   setAccentColor: () => {},
 });
 
 export const ThemeProvider = ({ children }) => {
   const systemScheme = useColorScheme();
   const [theme, setTheme] = useState(systemScheme || 'light');
-  const [accentColor, setAccentColorState] = useState('#1F2937');
+  const [accentColor, setAccentColorState] = useState(DEFAULT_ACCENT);
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then((value) => {
