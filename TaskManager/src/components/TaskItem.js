@@ -16,6 +16,17 @@ const statusIcon = (status) => {
   }
 };
 
+const statusColor = (status) => {
+  switch (status) {
+    case 'Завершена':
+      return 'green';
+    case 'Отменена':
+      return 'red';
+    default:
+      return 'orange';
+  }
+};
+
 const TaskItem = ({ task, onPress, onToggle }) => (
   <TouchableOpacity style={styles.item} onPress={onPress}>
     <View>
@@ -24,8 +35,8 @@ const TaskItem = ({ task, onPress, onToggle }) => (
       <Text>{task.category}</Text>
     </View>
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <IconButton icon={statusIcon(task.status)} size={24} />
-      <IconButton icon="autorenew" onPress={onToggle} size={24} />
+      <IconButton icon={statusIcon(task.status)} iconColor={statusColor(task.status)} size={24} />
+      <IconButton icon={task.pinned ? 'pin' : 'pin-outline'} onPress={onToggle} size={24} />
     </View>
   </TouchableOpacity>
 );
