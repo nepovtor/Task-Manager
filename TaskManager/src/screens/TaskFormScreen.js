@@ -146,12 +146,13 @@ export default function TaskFormScreen({ navigation, route }) {
         style={styles.input}
       />
       {showDatePicker && (
-        <DateTimePicker
-          value={date ? new Date(`${date}T00:00:00`) : new Date()}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={onDateChange}
-        />
+      <DateTimePicker
+        value={date ? new Date(`${date}T00:00:00`) : new Date()}
+        mode="date"
+        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+        themeVariant={paperTheme.dark ? 'dark' : 'light'}
+        onChange={onDateChange}
+      />
       )}
 
       <TextInput
@@ -163,12 +164,13 @@ export default function TaskFormScreen({ navigation, route }) {
         style={styles.input}
       />
       {showTimePicker && (
-        <DateTimePicker
-          value={time ? new Date(`1970-01-01T${time}:00`) : new Date()}
-          mode="time"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={onTimeChange}
-        />
+      <DateTimePicker
+        value={time ? new Date(`1970-01-01T${time}:00`) : new Date()}
+        mode="time"
+        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+        themeVariant={paperTheme.dark ? 'dark' : 'light'}
+        onChange={onTimeChange}
+      />
       )}
       <TextInput
         mode="outlined"
