@@ -12,7 +12,13 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="TaskList">
         <Stack.Screen name="TaskList" component={TaskListScreen} options={{ title: 'Список задач' }} />
-        <Stack.Screen name="TaskForm" component={TaskFormScreen} options={{ title: 'Новая задача' }} />
+        <Stack.Screen
+          name="TaskForm"
+          component={TaskFormScreen}
+          options={({ route }) => ({
+            title: route.params?.task ? 'Редактирование' : 'Новая задача',
+          })}
+        />
         <Stack.Screen name="TaskDetail" component={TaskDetailScreen} options={{ title: 'Детали задачи' }} />
       </Stack.Navigator>
     </NavigationContainer>

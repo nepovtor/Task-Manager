@@ -30,6 +30,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "supabaseUrl": "https://your-supabase-url.supabase.co",
+      "supabaseAnonKey": "your-anon-key"
     }
   }
 }
