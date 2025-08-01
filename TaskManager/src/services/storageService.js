@@ -95,3 +95,12 @@ export const deleteTask = async (taskId) => {
     console.error('Ошибка при удалении задачи', error);
   }
 };
+
+export const saveTasksList = async (tasks) => {
+  try {
+    await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+    await syncTasks(tasks);
+  } catch (error) {
+    console.error('Ошибка при сохранении задач', error);
+  }
+};
