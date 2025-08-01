@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { Card, IconButton, Badge } from 'react-native-paper';
+import { Card, IconButton, Badge, Avatar } from 'react-native-paper';
 import styles from '../styles/styles';
+import formatDate from '../utils/formatDate';
 
 // navigation should be handled by the parent component. This component accepts
 // an onPress callback so that it can be reused in different contexts.
@@ -21,9 +22,9 @@ const statusColor = (status) => {
     case 'Завершена':
       return 'green';
     case 'Отменена':
-      return 'red';
+      return 'gray';
     default:
-      return 'orange';
+      return 'blue';
   }
 };
 
@@ -32,22 +33,36 @@ const badgeColor = (status) => {
     case 'Завершена':
       return 'green';
     case 'Отменена':
-      return 'red';
+      return 'gray';
     default:
       return 'blue';
   }
 };
 
-const TaskItem = ({ task, onPress, onToggle }) => (
-  <Card style={styles.item} onPress={onPress}>
+const categoryIcon = (category) => {
+  switch (category) {
+    case 'Работа':
+      return 'briefcase';
+    case 'Учёба':
+      return 'school';
+    default:
+      return 'account';
+  }
+};
+
+const TaskItem = ({ task, onPress, onToggle, onLongPress }) => (
+  <Card style={styles.item} onPress={onPress} onLongPress={onLongPress} mode="elevated">
     <Card.Content style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-      <View>
-        <Text style={styles.title}>{task.title}</Text>
-        <Text>{task.date}</Text>
-        <Text>{task.category}</Text>
-        <Badge style={{ backgroundColor: badgeColor(task.status), alignSelf: 'flex-start', marginTop: 4 }}>
-          {task.status}
-        </Badge>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Avatar.Icon size={32} icon={categoryIcon(task.category)} style={{ marginRight: 8 }} />
+        <View>
+          <Text style={styles.title}>{task.title}</Text>
+          <Text style={styles.secondary}>{formatDate(task.date)}</Text>
+          <Text style={styles.secondary}>{task.category}</Text>
+          <Badge style={{ backgroundColor: badgeColor(task.status), alignSelf: 'flex-start', marginTop: 4 }}>
+            {task.status}
+          </Badge>
+        </View>
       </View>
       <View style={{ alignItems: 'center' }}>
         {task.notificationId && <IconButton icon="bell" size={20} />}

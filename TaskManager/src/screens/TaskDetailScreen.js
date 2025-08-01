@@ -4,6 +4,7 @@ import { Text, Button } from 'react-native-paper';
 import { useThemePreferences } from '../context/ThemeContext';
 import { useTasks } from '../context/TaskContext';
 import { TASK_STATUSES } from '../constants';
+import formatDate from '../utils/formatDate';
 
 export default function TaskDetailScreen({ route, navigation }) {
   const { updateStatus, deleteTask } = useTasks();
@@ -26,7 +27,7 @@ export default function TaskDetailScreen({ route, navigation }) {
     <View style={{ flex: 1, padding: 16, backgroundColor: paperTheme.colors.background }}>
       <Text variant="titleLarge">{currentTask.title}</Text>
       <Text>{currentTask.description}</Text>
-      <Text>Дата: {currentTask.date}</Text>
+      <Text>Дата: {formatDate(currentTask.date)}</Text>
       <Text>Адрес: {currentTask.address}</Text>
       <Text>Категория: {currentTask.category}</Text>
       <Text>Статус: {currentTask.status}</Text>

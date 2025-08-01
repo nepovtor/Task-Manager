@@ -11,6 +11,7 @@ const i18n = new I18n({
     edit: 'Edit',
     newTask: 'New Task',
     taskDetails: 'Task Details',
+    settings: 'Settings',
   },
   ru: {
     taskList: 'Список задач',
@@ -20,6 +21,7 @@ const i18n = new I18n({
     edit: 'Редактирование',
     newTask: 'Новая задача',
     taskDetails: 'Детали задачи',
+    settings: 'Настройки',
   },
 });
 
