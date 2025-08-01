@@ -4,7 +4,7 @@
     "slug": "task-manager",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./task-manager/assets/images/icon.png",
+    "icon": "./tasklist.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./task-manager/assets/images/splash-icon.png",
@@ -24,12 +24,12 @@
     "android": {
       "package": "com.nepovtor.taskmanager",
       "adaptiveIcon": {
-        "foregroundImage": "./task-manager/assets/images/adaptive-icon.png",
+        "foregroundImage": "./tasklist.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./task-manager/assets/images/favicon.png"
+      "favicon": "./tasklist.png"
     },
     "extra": {
       "supabaseUrl": "https://your-supabase-url.supabase.co",
