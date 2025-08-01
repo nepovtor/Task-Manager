@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
+const systemFont = Platform.select({ ios: 'System', android: 'sans-serif' });
 const baseFonts = {
-  bodyLarge: { ...MD3LightTheme.fonts.bodyLarge, fontFamily: 'Inter_400Regular' },
-  bodyMedium: { ...MD3LightTheme.fonts.bodyMedium, fontFamily: 'Inter_400Regular' },
-  titleLarge: { ...MD3LightTheme.fonts.titleLarge, fontFamily: 'RobotoFlex_500Medium' },
+  bodyLarge: { ...MD3LightTheme.fonts.bodyLarge, fontFamily: systemFont },
+  bodyMedium: { ...MD3LightTheme.fonts.bodyMedium, fontFamily: systemFont },
+  titleLarge: { ...MD3LightTheme.fonts.titleLarge, fontFamily: systemFont },
 };
 
 const createThemes = (accent) => ({

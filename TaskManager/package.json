@@ -10,8 +10,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "@expo-google-fonts/inter": "^0.4.1",
-    "@expo-google-fonts/roboto-flex": "^0.4.0",
     "@expo/metro-runtime": "~5.0.4",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-community/datetimepicker": "8.4.1",
@@ -23,7 +21,6 @@
     "expo": "^53.0.20",
     "expo-auth-session": "^6.2.1",
     "expo-device": "~7.1.4",
-    "expo-font": "^13.3.2",
     "expo-localization": "~16.1.6",
     "expo-notifications": "~0.31.4",
     "expo-status-bar": "~2.2.3",
