@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as Notifications from 'expo-notifications';
-import { Provider as PaperProvider } from 'react-native-paper';
+import { Provider as PaperProvider, ActivityIndicator } from 'react-native-paper';
+import { View } from 'react-native';
 import { useFonts, Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
 import { RobotoFlex_400Regular, RobotoFlex_500Medium } from '@expo-google-fonts/roboto-flex';
 import AppNavigator from './src/navigation/AppNavigator';
@@ -20,7 +21,11 @@ function MainApp() {
   });
 
   if (!fontsLoaded) {
-    return null;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator animating size="large" />
+      </View>
+    );
   }
 
   useEffect(() => {
