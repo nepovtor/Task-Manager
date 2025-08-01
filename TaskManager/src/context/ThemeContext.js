@@ -3,11 +3,37 @@ import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
+const customLightTheme = {
+  ...MD3LightTheme,
+  colors: {
+    ...MD3LightTheme.colors,
+    primary: '#6750A4',
+    secondary: '#9A82DB',
+    background: '#F4F4F7',
+    surface: '#FFFFFF',
+    onBackground: '#1C1B1F',
+    onSurface: '#1C1B1F',
+  },
+};
+
+const customDarkTheme = {
+  ...MD3DarkTheme,
+  colors: {
+    ...MD3DarkTheme.colors,
+    primary: '#D0BCFF',
+    secondary: '#CCC2DC',
+    background: '#1C1B1F',
+    surface: '#2B2A2E',
+    onBackground: '#E6E1E5',
+    onSurface: '#E6E1E5',
+  },
+};
+
 const STORAGE_KEY = 'APP_THEME';
 
 const ThemeContext = createContext({
   theme: 'light',
-  paperTheme: MD3LightTheme,
+  paperTheme: customLightTheme,
   toggleTheme: () => {},
 });
 
@@ -29,7 +55,7 @@ export const ThemeProvider = ({ children }) => {
     await AsyncStorage.setItem(STORAGE_KEY, newTheme);
   };
 
-  const paperTheme = theme === 'light' ? MD3LightTheme : MD3DarkTheme;
+  const paperTheme = theme === 'light' ? customLightTheme : customDarkTheme;
 
   return (
     <ThemeContext.Provider value={{ theme, paperTheme, toggleTheme }}>

@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton, Switch, Text } from 'react-native-paper';
+import { useThemePreferences } from '../context/ThemeContext';
 import { useTasks } from '../context/TaskContext';
 import { scheduleTaskNotification, cancelTaskNotification } from '../services/notificationService';
 import { TASK_STATUSES } from '../constants';
 
 export default function TaskFormScreen({ navigation, route }) {
   const { addTask, updateTask } = useTasks();
+  const { paperTheme } = useThemePreferences();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -114,7 +116,7 @@ export default function TaskFormScreen({ navigation, route }) {
   };
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
+    <View style={{ flex: 1, padding: 16, backgroundColor: paperTheme.colors.background }}>
       <TextInput label="Заголовок" value={title} onChangeText={setTitle} style={{ marginBottom: 8 }} />
       <TextInput label="Описание" value={description} onChangeText={setDescription} style={{ marginBottom: 8 }} />
       <TextInput
