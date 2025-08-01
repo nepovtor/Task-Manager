@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, FlatList } from 'react-native';
 import { FAB, Appbar, Menu, Searchbar, Text, Button } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
-import { getTasks } from '../services/storageService';
+import { getTasks, toggleTaskPinned } from '../services/storageService';
 import TaskItem from '../components/TaskItem';
 import TaskWidget from '../components/TaskWidget';
 import styles from '../styles/styles';
@@ -36,10 +36,15 @@ export default function TaskListScreen({ navigation }) {
   };
 
   const sortTasks = (tasksArray, type) => {
-    if (type === 'status') {
-      return [...tasksArray].sort((a, b) => a.status.localeCompare(b.status));
-    }
-    return [...tasksArray].sort((a, b) => new Date(a.date) - new Date(b.date));
+    return [...tasksArray].sort((a, b) => {
+      if (a.pinned !== b.pinned) {
+        return a.pinned ? -1 : 1;
+      }
+      if (type === 'status') {
+        return a.status.localeCompare(b.status);
+      }
+      return new Date(a.date) - new Date(b.date);
+    });
   };
 
   const changeSort = (type) => {
@@ -51,6 +56,15 @@ export default function TaskListScreen({ navigation }) {
   const changeFilter = (status) => {
     setFilterStatus(status);
     setFilterMenuVisible(false);
+  };
+
+  const handleTogglePin = async (id) => {
+    const updated = await toggleTaskPinned(id);
+    if (updated) {
+      setTasks((prev) =>
+        sortTasks(prev.map((t) => (t.id === id ? updated : t)), sortType)
+      );
+    }
   };
 
   return (
@@ -115,6 +129,7 @@ export default function TaskListScreen({ navigation }) {
             <TaskItem
               task={item}
               onPress={() => navigation.navigate('TaskDetail', { task: item })}
+              onToggle={() => handleTogglePin(item.id)}
             />
           )}
           contentContainerStyle={{ flexGrow: 1 }}

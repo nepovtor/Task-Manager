@@ -32,15 +32,22 @@ export async function scheduleTaskNotification(task) {
       return null;
     }
 
-    const trigger =
-      task.repeat && task.repeat !== 'none'
-        ? {
-            hour: notificationTime.getHours(),
-            minute: notificationTime.getMinutes(),
-            repeats: true,
-            weekday: task.repeat === 'weekly' ? notificationTime.getDay() : undefined,
-          }
-        : notificationTime;
+    let trigger;
+    if (task.repeat && task.repeat !== 'none') {
+      if (task.repeat === 'custom') {
+        const days = task.customDays || 1;
+        trigger = { seconds: 86400 * days, repeats: true };
+      } else {
+        trigger = {
+          hour: notificationTime.getHours(),
+          minute: notificationTime.getMinutes(),
+          repeats: true,
+          weekday: task.repeat === 'weekly' ? notificationTime.getDay() : undefined,
+        };
+      }
+    } else {
+      trigger = notificationTime;
+    }
 
     const id = await Notifications.scheduleNotificationAsync({
       content: {
