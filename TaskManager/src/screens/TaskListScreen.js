@@ -36,7 +36,7 @@ export default function TaskListScreen({ navigation }) {
     if (isFocused) {
       updateList();
     }
-  }, [isFocused, filterStatus, searchQuery, storedTasks]);
+  }, [isFocused, filterStatus, searchQuery, storedTasks, sortType]);
 
   const updateList = () => {
     let list = storedTasks || [];
