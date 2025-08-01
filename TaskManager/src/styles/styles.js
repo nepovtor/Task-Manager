@@ -15,7 +15,9 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
   addButton: {
-    marginTop: 16,
+    position: 'absolute',
+    right: 16,
+    bottom: 16,
     backgroundColor: '#2563EB',
   },
   saveButton: {

@@ -3,10 +3,11 @@ import { View, TextInput, Button, Alert } from 'react-native';
 import storageService from '../services/storageService';
 import styles from '../styles/styles';
 
-const TaskFormScreen = ({ navigation }) => {
-  const [title, setTitle] = useState('');
-  const [date, setDate] = useState('');
-  const [status, setStatus] = useState('В процессе');
+const TaskFormScreen = ({ navigation, route }) => {
+  const editingTask = route.params?.task;
+  const [title, setTitle] = useState(editingTask ? editingTask.title : '');
+  const [date, setDate] = useState(editingTask ? editingTask.date : '');
+  const [status, setStatus] = useState(editingTask ? editingTask.status : 'В процессе');
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -18,14 +19,21 @@ const TaskFormScreen = ({ navigation }) => {
       return;
     }
     try {
-      const newTask = {
-        id: Date.now(),
-        title,
-        date,
-        status,
-      };
       const tasks = await storageService.getTasks();
-      await storageService.saveTasks([...tasks, newTask]);
+      if (editingTask) {
+        const updated = tasks.map((t) =>
+          t.id === editingTask.id ? { ...t, title, date, status } : t
+        );
+        await storageService.saveTasks(updated);
+      } else {
+        const newTask = {
+          id: Date.now(),
+          title,
+          date,
+          status,
+        };
+        await storageService.saveTasks([...tasks, newTask]);
+      }
       navigation.goBack();
     } catch (error) {
       Alert.alert('Ошибка', 'Не удалось сохранить задачу');

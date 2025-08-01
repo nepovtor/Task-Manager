@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, FlatList, Alert } from 'react-native';
+import { FAB } from 'react-native-paper';
 import TaskItem from '../components/TaskItem';
 import storageService from '../services/storageService';
 import styles from '../styles/styles';
@@ -53,6 +54,11 @@ const TaskListScreen = ({ navigation }) => {
             onToggle={() => handleToggleStatus(item.id)}
           />
         )}
+      />
+      <FAB
+        icon="plus"
+        style={styles.addButton}
+        onPress={() => navigation.navigate('TaskForm')}
       />
     </View>
   );
