@@ -1,8 +1,7 @@
 import * as Localization from 'expo-localization';
-import i18n from 'i18n-js';
+import { I18n } from 'i18n-js';
 
-i18n.fallbacks = true;
-i18n.translations = {
+const i18n = new I18n({
   en: {
     taskList: 'Task List',
     noTasks: 'No tasks',
@@ -21,8 +20,9 @@ i18n.translations = {
     newTask: 'Новая задача',
     taskDetails: 'Детали задачи',
   },
-};
+});
 
+i18n.fallbacks = true;
 i18n.locale = Localization.locale;
 
 export default i18n;
