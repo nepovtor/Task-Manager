@@ -4,16 +4,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
 const systemFont = Platform.select({ ios: 'System', android: 'sans-serif' });
-const baseFonts = {
-  bodyLarge: { ...MD3LightTheme.fonts.bodyLarge, fontFamily: systemFont },
-  bodyMedium: { ...MD3LightTheme.fonts.bodyMedium, fontFamily: systemFont },
-  titleLarge: { ...MD3LightTheme.fonts.titleLarge, fontFamily: systemFont },
-};
+const baseFonts = {};
+Object.keys(MD3LightTheme.fonts).forEach((k) => {
+  baseFonts[k] = { ...MD3LightTheme.fonts[k], fontFamily: systemFont };
+});
 
 const createThemes = (accent) => ({
   light: {
     ...MD3LightTheme,
-    fonts: { ...MD3LightTheme.fonts, ...baseFonts },
+    fonts: baseFonts,
     colors: {
       ...MD3LightTheme.colors,
       primary: accent,
@@ -26,7 +25,7 @@ const createThemes = (accent) => ({
   },
   dark: {
     ...MD3DarkTheme,
-    fonts: { ...MD3DarkTheme.fonts, ...baseFonts },
+    fonts: baseFonts,
     colors: {
       ...MD3DarkTheme.colors,
       primary: accent,

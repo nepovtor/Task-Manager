@@ -1,6 +1,4 @@
-import { StyleSheet, Platform } from 'react-native';
-
-const systemFont = Platform.select({ ios: 'System', android: 'sans-serif' });
+import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   item: {
@@ -13,12 +11,10 @@ export default StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '500',
-    fontFamily: systemFont,
   },
   secondary: {
     fontSize: 14,
     color: '#777',
-    fontFamily: systemFont,
   },
   fab: {
   position: 'absolute',
@@ -56,7 +52,6 @@ export default StyleSheet.create({
   detailTitle: {
     fontSize: 20,
     fontWeight: '500',
-    fontFamily: systemFont,
     marginBottom: 12,
   },
 });
