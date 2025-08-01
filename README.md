@@ -237,9 +237,8 @@ npx expo upgrade
 
 ## 👨‍💻 Автор
 
-**Ваше Имя**
-- GitHub: [@your-username](https://github.com/your-username)
-- Email: your.email@example.com
+**github**
+- GitHub: [@nepovtor](https://github.com/nepovtor)
 
 ## 🙏 Благодарности
 
