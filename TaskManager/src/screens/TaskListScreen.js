@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, FlatList } from 'react-native';
-import { FAB, Appbar, Menu, Searchbar, Text, Button, Divider } from 'react-native-paper';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, FlatList, Animated } from 'react-native';
+import { FAB, Appbar, Menu, Searchbar, Text, Button, Divider, Snackbar } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { useTasks } from '../context/TaskContext';
 import { useThemePreferences } from '../context/ThemeContext';
@@ -15,12 +15,22 @@ export default function TaskListScreen({ navigation }) {
   const { theme, toggleTheme, paperTheme } = useThemePreferences();
   const [tasks, setTasks] = useState([]);
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const anim = useRef(new Animated.Value(0)).current;
+  const [snackbar, setSnackbar] = useState('');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [sortType, setSortType] = useState('date'); // date | status
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [language, setLanguage] = useState(i18n.locale);
   const isFocused = useIsFocused();
+
+  useEffect(() => {
+    Animated.timing(anim, {
+      toValue: settingsVisible ? 1 : 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [settingsVisible]);
 
   useEffect(() => {
     if (isFocused) {
@@ -78,19 +88,51 @@ export default function TaskListScreen({ navigation }) {
         <Menu
           visible={settingsVisible}
           onDismiss={() => setSettingsVisible(false)}
-          anchor={<Appbar.Action icon="hexagon-outline" onPress={() => setSettingsVisible(true)} />}
+          anchor={
+            <Animated.View
+              style={{
+                transform: [
+                  {
+                    rotate: anim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '90deg'],
+                    }),
+                  },
+                ],
+              }}
+            >
+              <Appbar.Action icon="hexagon-outline" onPress={() => setSettingsVisible(true)} />
+            </Animated.View>
+          }
         >
+          <Menu.Item title="Отображение" disabled />
+          <Menu.Item
+            onPress={() => {
+              toggleTheme();
+              setSnackbar('Тема изменена');
+            }}
+            title={theme === 'light' ? 'Тёмная тема' : 'Светлая тема'}
+          />
+          <Menu.Item
+            onPress={() => {
+              const lang = language === 'ru' ? 'en' : 'ru';
+              i18n.locale = lang;
+              setLanguage(lang);
+              setSnackbar('Язык переключен');
+            }}
+            title={language === 'ru' ? 'Switch to English' : 'Переключить на русский'}
+          />
+          <Divider />
+          <Menu.Item title="Управление задачами" disabled />
           <Menu.Item onPress={() => changeSort('date')} title="Сортировать по дате" />
           <Menu.Item onPress={() => changeSort('status')} title="Сортировать по статусу" />
-          <Divider />
           <Menu.Item onPress={() => changeFilter('all')} title="Все" />
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[0])} title="Активные" />
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[1])} title="Завершённые" />
           <Menu.Item onPress={() => changeFilter(TASK_STATUSES[2])} title="Отменённые" />
           <Divider />
-          <Menu.Item onPress={toggleTheme} title={theme === 'light' ? 'Тёмная тема' : 'Светлая тема'} />
+          <Menu.Item title="Система" disabled />
           <Menu.Item onPress={() => setNotificationsEnabled(!notificationsEnabled)} title={notificationsEnabled ? 'Отключить уведомления' : 'Включить уведомления'} />
-          <Menu.Item onPress={() => { const lang = language === 'ru' ? 'en' : 'ru'; i18n.locale = lang; setLanguage(lang); }} title={language === 'ru' ? 'Switch to English' : 'Переключить на русский'} />
           <Menu.Item onPress={() => { setSettingsVisible(false); navigation.navigate('About'); }} title="О приложении" />
           <Menu.Item onPress={() => { setSettingsVisible(false); navigation.navigate('Settings'); }} title="Расширенные настройки" />
         </Menu>
@@ -136,6 +178,13 @@ export default function TaskListScreen({ navigation }) {
         icon="plus"
         onPress={() => navigation.navigate('TaskForm')}
       />
+      <Snackbar
+        visible={!!snackbar}
+        onDismiss={() => setSnackbar('')}
+        duration={1500}
+      >
+        {snackbar}
+      </Snackbar>
     </View>
   );
 }
