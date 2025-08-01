@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Text, Button } from 'react-native-paper';
+import { useThemePreferences } from '../context/ThemeContext';
 import { useTasks } from '../context/TaskContext';
 import { TASK_STATUSES } from '../constants';
 
 export default function TaskDetailScreen({ route, navigation }) {
   const { updateStatus, deleteTask } = useTasks();
+  const { paperTheme } = useThemePreferences();
   const { task } = route.params;
   const [currentTask, setCurrentTask] = useState(task);
 
@@ -21,7 +23,7 @@ export default function TaskDetailScreen({ route, navigation }) {
   };
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
+    <View style={{ flex: 1, padding: 16, backgroundColor: paperTheme.colors.background }}>
       <Text variant="titleLarge">{currentTask.title}</Text>
       <Text>{currentTask.description}</Text>
       <Text>Дата: {currentTask.date}</Text>

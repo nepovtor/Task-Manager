@@ -12,7 +12,7 @@ import styles from '../styles/styles';
 
 export default function TaskListScreen({ navigation }) {
   const { tasks: storedTasks, togglePin } = useTasks();
-  const { theme, toggleTheme } = useThemePreferences();
+  const { theme, toggleTheme, paperTheme } = useThemePreferences();
   const [tasks, setTasks] = useState([]);
   const [menuVisible, setMenuVisible] = useState(false);
   const [filterMenuVisible, setFilterMenuVisible] = useState(false);
@@ -70,7 +70,7 @@ export default function TaskListScreen({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: paperTheme.colors.background }}>
       {/* Appbar с меню сортировки */}
       <Appbar.Header>
         <Appbar.Content title={i18n.t('taskList')} />
@@ -80,7 +80,6 @@ export default function TaskListScreen({ navigation }) {
           anchor={
             <Appbar.Action
               icon="sort"
-              color="white"
               onPress={() => setMenuVisible(true)}
             />
           }
@@ -94,7 +93,6 @@ export default function TaskListScreen({ navigation }) {
           anchor={
             <Appbar.Action
               icon="filter"
-              color="white"
               onPress={() => setFilterMenuVisible(true)}
             />
           }
@@ -106,7 +104,6 @@ export default function TaskListScreen({ navigation }) {
         </Menu>
         <Appbar.Action
           icon={theme === 'light' ? 'weather-night' : 'white-balance-sunny'}
-          color="white"
           onPress={toggleTheme}
         />
       </Appbar.Header>
@@ -145,7 +142,7 @@ export default function TaskListScreen({ navigation }) {
 
       {/* Кнопка добавления задачи */}
       <FAB
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
         icon="plus"
         onPress={() => navigation.navigate('TaskForm')}
       />
