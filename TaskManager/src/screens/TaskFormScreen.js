@@ -1,54 +1,104 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Alert } from 'react-native';
-import storageService from '../services/storageService';
-import styles from '../styles/styles';
+import { View } from 'react-native';
+import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton } from 'react-native-paper';
+import { saveTask } from '../services/storageService';
+import { scheduleTaskNotification } from '../services/notificationService';
 
-const TaskFormScreen = ({ navigation }) => {
+export default function TaskFormScreen({ navigation }) {
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
-  const [status, setStatus] = useState('В процессе');
+  const [time, setTime] = useState('');
+  const [address, setAddress] = useState('');
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [reminderTime, setReminderTime] = useState('10');
+  const [repeat, setRepeat] = useState('none'); // none | daily | weekly
 
-  const handleSave = async () => {
+  const isValidDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const isValidTime = (value) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(value);
+
+  const handleSave = () => {
     if (!title.trim()) {
-      Alert.alert('Ошибка', 'Название задачи не может быть пустым!');
+      alert('Введите заголовок задачи');
       return;
     }
-    if (isNaN(Date.parse(date))) {
-      Alert.alert('Ошибка', 'Введите корректную дату!');
+    if (!isValidDate(date)) {
+      alert('Введите дату в формате YYYY-MM-DD');
       return;
     }
-    try {
-      const newTask = {
-        id: Date.now(),
-        title,
-        date,
-        status,
-      };
-      const tasks = await storageService.getTasks();
-      await storageService.saveTasks([...tasks, newTask]);
-      navigation.goBack();
-    } catch (error) {
-      Alert.alert('Ошибка', 'Не удалось сохранить задачу');
+    if (!isValidTime(time)) {
+      alert('Введите время в формате HH:mm');
+      return;
     }
+
+    const taskDateTime = new Date(`${date}T${time}:00`);
+    if (isNaN(taskDateTime.getTime()) || taskDateTime < new Date()) {
+      alert('Дата и время некорректны');
+      return;
+    }
+
+    setDialogVisible(true);
+  };
+
+  const confirmSave = async () => {
+    const taskDateTime = new Date(`${date}T${time}:00`);
+
+    const newTask = {
+      id: Date.now().toString(),
+      title,
+      description,
+      date: taskDateTime.toISOString(),
+      address,
+      status: 'В процессе',
+      reminder: reminderTime,
+      repeat, // новое поле
+    };
+
+    await saveTask(newTask);
+    await scheduleTaskNotification(newTask);
+
+    setDialogVisible(false);
+    setSnackbarVisible(true);
+
+    setTimeout(() => navigation.goBack(), 1000);
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Название задачи"
-        value={title}
-        onChangeText={setTitle}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Дата и время (YYYY-MM-DD HH:mm)"
-        value={date}
-        onChangeText={setDate}
-      />
-      <Button title="Сохранить" onPress={handleSave} />
+    <View style={{ flex: 1, padding: 16 }}>
+      <TextInput label="Заголовок" value={title} onChangeText={setTitle} style={{ marginBottom: 8 }} />
+      <TextInput label="Описание" value={description} onChangeText={setDescription} style={{ marginBottom: 8 }} />
+      <TextInput label="Дата (YYYY-MM-DD)" value={date} onChangeText={setDate} style={{ marginBottom: 8 }} />
+      <TextInput label="Время (HH:mm)" value={time} onChangeText={setTime} style={{ marginBottom: 8 }} />
+      <TextInput label="Адрес" value={address} onChangeText={setAddress} style={{ marginBottom: 8 }} />
+
+      <Button mode="contained" onPress={handleSave}>Сохранить</Button>
+
+      <Portal>
+        <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
+          <Dialog.Title>Напоминание</Dialog.Title>
+          <Dialog.Content>
+            <RadioButton.Group onValueChange={setReminderTime} value={reminderTime}>
+              <RadioButton.Item label="За 10 минут" value="10" />
+              <RadioButton.Item label="За 30 минут" value="30" />
+              <RadioButton.Item label="За 1 час" value="60" />
+            </RadioButton.Group>
+
+            <RadioButton.Group onValueChange={setRepeat} value={repeat}>
+              <RadioButton.Item label="Не повторять" value="none" />
+              <RadioButton.Item label="Каждый день" value="daily" />
+              <RadioButton.Item label="Каждую неделю" value="weekly" />
+            </RadioButton.Group>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={confirmSave}>OK</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
+      <Snackbar visible={snackbarVisible} onDismiss={() => setSnackbarVisible(false)} duration={1500}>
+        Задача сохранена!
+      </Snackbar>
     </View>
   );
-};
-
-export default TaskFormScreen;
+}

@@ -1,6 +1,14 @@
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
+  fab: {
+  position: 'absolute',
+  margin: 16,
+  right: 16,
+  bottom: 16,
+  backgroundColor: '#007bff',
+},
+
   container: {
     flex: 1,
     padding: 16,
@@ -32,3 +40,4 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
 });
+

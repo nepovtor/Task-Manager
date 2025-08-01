@@ -1,8 +1,35 @@
 {
-  "android": {
-    "package": "com.anonymous.taskmanager"
-  },
-  "ios": {
-    "bundleIdentifier": "com.anonymous.taskmanager"
+  "expo": {
+    "name": "Task Manager",
+    "slug": "task-manager",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.nepovtor.taskmanager",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.nepovtor.taskmanager",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
   }
 }
