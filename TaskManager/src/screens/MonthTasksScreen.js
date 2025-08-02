@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, SectionList, Platform } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, SectionList, Platform, LayoutAnimation } from 'react-native';
 import { useTheme, Appbar, FAB, List, Text } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Print from 'expo-print';
@@ -20,24 +20,41 @@ export default function MonthTasksScreen({ route, navigation }) {
 
   const [monthDate, setMonthDate] = useState(initial);
   const [showPicker, setShowPicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDates, setSelectedDates] = useState([]);
+  const [monthTasks, setMonthTasks] = useState([]);
+  const cacheRef = useRef({});
 
   const month = monthDate.getMonth();
   const year = monthDate.getFullYear();
 
-  const monthTasks = tasks
-    .filter((t) => {
-      const d = new Date(t.date);
-      return d.getMonth() === month && d.getFullYear() === year;
-    })
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  useEffect(() => {
+    cacheRef.current = {};
+  }, [tasks]);
 
-  const displayTasks = selectedDate
-    ? monthTasks.filter(
-        (t) =>
-          new Date(t.date).toISOString().split('T')[0] === selectedDate,
-      )
-    : monthTasks;
+  useEffect(() => {
+    const key = `${year}-${month}`;
+    if (cacheRef.current[key]) {
+      setMonthTasks(cacheRef.current[key]);
+    } else {
+      const data = tasks
+        .filter((t) => {
+          const d = new Date(t.date);
+          return d.getMonth() === month && d.getFullYear() === year;
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      cacheRef.current[key] = data;
+      setMonthTasks(data);
+    }
+  }, [tasks, month, year]);
+
+  const displayTasks =
+    selectedDates.length > 0
+      ? monthTasks.filter((t) =>
+          selectedDates.includes(
+            new Date(t.date).toISOString().split('T')[0],
+          ),
+        )
+      : monthTasks;
 
   const sections = TASK_STATUSES.map((status) => ({
     title: status,
@@ -53,6 +70,7 @@ export default function MonthTasksScreen({ route, navigation }) {
     setShowPicker(false);
     if (selected) {
       selected.setDate(1);
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setMonthDate(selected);
     }
   };
@@ -88,7 +106,7 @@ export default function MonthTasksScreen({ route, navigation }) {
     const d = new Date(date);
     const dayString = d.toISOString().split('T')[0];
     const today = new Date().toISOString().split('T')[0];
-    if (dayString === today || dayString === selectedDate) {
+    if (dayString === today || selectedDates.includes(dayString)) {
       return { backgroundColor: '#e3f2fd' };
     }
     return null;
@@ -99,6 +117,18 @@ export default function MonthTasksScreen({ route, navigation }) {
       <Appbar.Header>
         <Appbar.Action icon="calendar-month" onPress={() => setShowPicker(true)} />
         <Appbar.Content title={monthLabel} />
+        <Appbar.Action
+          icon="calendar-today"
+          onPress={() => {
+            LayoutAnimation.configureNext(
+              LayoutAnimation.Presets.easeInEaseOut,
+            );
+            const now = new Date();
+            now.setDate(1);
+            setMonthDate(now);
+            setSelectedDates([]);
+          }}
+        />
         <Appbar.Action icon="file-pdf-box" onPress={exportPdf} />
         <Appbar.Action icon="file-excel" onPress={exportCsv} />
       </Appbar.Header>
@@ -113,13 +143,18 @@ export default function MonthTasksScreen({ route, navigation }) {
       <MiniCalendar
         tasks={monthTasks}
         monthDate={monthDate}
-        selectedDate={selectedDate}
+        selectedDates={selectedDates}
         onSelectDate={(d) =>
-          setSelectedDate((prev) => (prev === d ? null : d))
+          setSelectedDates((prev) =>
+            prev.includes(d) ? prev.filter((p) => p !== d) : [...prev, d],
+          )
         }
         onChangeMonth={(d) => {
+          LayoutAnimation.configureNext(
+            LayoutAnimation.Presets.easeInEaseOut,
+          );
           setMonthDate(d);
-          setSelectedDate(null);
+          setSelectedDates([]);
         }}
       />
       <SectionList

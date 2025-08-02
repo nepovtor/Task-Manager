@@ -11,26 +11,44 @@ LocaleConfig.locales.ru = {
 };
 LocaleConfig.defaultLocale = 'ru';
 
-export default function MiniCalendar({ tasks, monthDate, selectedDate, onSelectDate, onChangeMonth }) {
+export default function MiniCalendar({
+  tasks,
+  monthDate,
+  selectedDates = [],
+  onSelectDate,
+  onChangeMonth,
+}) {
   const paper = useTheme();
+
+  const statusColors = {
+    'В процессе': '#2196F3',
+    Завершена: '#4CAF50',
+    Отменена: '#F44336',
+  };
 
   const marked = tasks.reduce((acc, task) => {
     const date = new Date(task.date).toISOString().split('T')[0];
-    acc[date] = {
-      ...(acc[date] || {}),
-      marked: true,
-      dotColor: paper.colors.primary,
-    };
+    const color = statusColors[task.status] || paper.colors.primary;
+    const dot = { key: task.status, color };
+    if (acc[date]) {
+      const dots = acc[date].dots || [];
+      if (!dots.some((d) => d.key === dot.key)) {
+        dots.push(dot);
+      }
+      acc[date].dots = dots;
+    } else {
+      acc[date] = { dots: [dot] };
+    }
     return acc;
   }, {});
 
-  if (selectedDate) {
-    marked[selectedDate] = {
-      ...(marked[selectedDate] || {}),
+  selectedDates.forEach((d) => {
+    marked[d] = {
+      ...(marked[d] || {}),
       selected: true,
       selectedColor: paper.colors.primary,
     };
-  }
+  });
 
   return (
     <Calendar
@@ -38,6 +56,7 @@ export default function MiniCalendar({ tasks, monthDate, selectedDate, onSelectD
       onMonthChange={(m) => onChangeMonth(new Date(m.year, m.month - 1, 1))}
       onDayPress={(day) => onSelectDate(day.dateString)}
       markedDates={marked}
+      markingType="multi-dot"
       hideExtraDays
       firstDay={1}
       enableSwipeMonths
