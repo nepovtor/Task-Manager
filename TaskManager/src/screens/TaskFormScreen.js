@@ -10,7 +10,7 @@ import styles from '../styles/styles';
 import { useThemePreferences } from '../context/ThemeContext';
 import { useTasks } from '../context/TaskContext';
 import { scheduleTaskNotification, cancelTaskNotification } from '../services/notificationService';
-import { TASK_STATUSES } from '../constants';
+import { TASK_STATUSES, TASK_PRIORITIES } from '../constants';
 
 const categoryIcon = (category) => {
   switch (category) {
@@ -42,6 +42,7 @@ export default function TaskFormScreen({ navigation, route }) {
   const [pinned, setPinned] = useState(false);
   const [category, setCategory] = useState('Работа');
   const [status, setStatus] = useState(TASK_STATUSES[0]);
+  const [priority, setPriority] = useState(TASK_PRIORITIES[1]);
   const [categoryMenuVisible, setCategoryMenuVisible] = useState(false);
   const [descHeight, setDescHeight] = useState(80);
   const [tempDate, setTempDate] = useState(now);
@@ -62,6 +63,7 @@ export default function TaskFormScreen({ navigation, route }) {
       setCategory(editingTask.category || 'Работа');
       setPinned(editingTask.pinned || false);
       setStatus(editingTask.status || TASK_STATUSES[0]);
+      setPriority(editingTask.priority || TASK_PRIORITIES[1]);
       setTempDate(new Date(editingTask.date));
       setTempTime(new Date(editingTask.date));
     }
@@ -96,6 +98,7 @@ export default function TaskFormScreen({ navigation, route }) {
       date: taskDateTime.toISOString(),
       address,
       status,
+      priority,
       reminder: reminderTime,
       repeat,
       customDays: repeat === 'custom' ? parseInt(customDays, 10) : undefined,
@@ -245,6 +248,13 @@ export default function TaskFormScreen({ navigation, route }) {
         onValueChange={setStatus}
         style={{ marginBottom: 12 }}
         buttons={TASK_STATUSES.map((s) => ({ value: s, label: s }))}
+      />
+
+      <SegmentedControl
+        value={priority}
+        onValueChange={setPriority}
+        style={{ marginBottom: 12 }}
+        buttons={TASK_PRIORITIES.map((p) => ({ value: p, label: p }))}
       />
 
       <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>

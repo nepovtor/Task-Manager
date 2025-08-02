@@ -22,10 +22,10 @@ describe('storageService', () => {
   });
 
   test('getTasks returns parsed tasks', async () => {
-    const tasks = [{ id: '1', title: 't' }];
+    const tasks = [{ id: '1', title: 't', priority: 'Высокий' }];
     AsyncStorage.getItem.mockResolvedValue(JSON.stringify(tasks));
     const res = await getTasks();
-    expect(res[0].id).toBe('1');
+    expect(res[0].priority).toBe('Высокий');
   });
 
   test('saveTask stores new task', async () => {
