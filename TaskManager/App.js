@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as Notifications from 'expo-notifications';
 import { Provider as PaperProvider } from 'react-native-paper';
+import { StatusBar } from 'expo-status-bar';
 import AppNavigator from './src/navigation/AppNavigator';
 import { registerForPushNotificationsAsync } from './src/services/notificationService';
 import { TaskProvider } from './src/context/TaskContext';
@@ -27,6 +28,7 @@ function MainApp() {
 
   return (
     <PaperProvider theme={paperTheme}>
+      <StatusBar style={paperTheme.dark ? 'light' : 'dark'} />
       <TaskProvider>
         {user ? <AppNavigator /> : <SignInScreen onSignIn={setUser} />}
       </TaskProvider>
