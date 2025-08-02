@@ -32,7 +32,9 @@ const TaskItem = ({ task, onPress, onToggle, onLongPress }) => {
   const overdue = new Date(task.date) < new Date() && task.status === 'В процессе';
   return (
     <Card style={styles.item} onPress={onPress} onLongPress={onLongPress} mode="elevated">
-      <Card.Content style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Card.Content
+        style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 0 }}
+      >
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
           <Avatar.Icon size={24} icon={categoryIcon(task.category)} style={{ marginRight: 8 }} />
           <View style={{ flex: 1 }}>

@@ -5,8 +5,8 @@ export default StyleSheet.create({
     marginVertical: 4,
     borderRadius: 8,
     elevation: 1,
-    paddingVertical: 4,
-    height: 56,
+    paddingVertical: 8,
+    minHeight: 56,
   },
   title: {
     fontSize: 16,
