@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Platform } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
-import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton, Switch, Text, Menu, SegmentedButtons } from 'react-native-paper';
+import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton, Text, Menu } from 'react-native-paper';
+import IOSSwitch from '../components/IOSSwitch';
+import PrimaryButton from '../components/PrimaryButton';
+import SegmentedControl from '../components/SegmentedControl';
+import IOSDatePicker from '../components/IOSDatePicker';
 import styles from '../styles/styles';
 import { useThemePreferences } from '../context/ThemeContext';
 import { useTasks } from '../context/TaskContext';
@@ -121,17 +124,6 @@ export default function TaskFormScreen({ navigation, route }) {
     setTimeout(() => navigation.goBack(), 1000);
   };
 
-  const onDateChange = (_, selectedDate) => {
-    if (selectedDate) {
-      setTempDate(selectedDate);
-    }
-  };
-
-  const onTimeChange = (_, selectedTime) => {
-    if (selectedTime) {
-      setTempTime(selectedTime);
-    }
-  };
 
   return (
     <View style={{ flex: 1, padding: 16, backgroundColor: paperTheme.colors.background }}>
@@ -142,6 +134,8 @@ export default function TaskFormScreen({ navigation, route }) {
         label="Заголовок"
         value={title}
         onChangeText={setTitle}
+        outlineColor="#B0B0B0"
+        activeOutlineColor="#4A90E2"
         style={styles.input}
       />
       <TextInput
@@ -152,6 +146,8 @@ export default function TaskFormScreen({ navigation, route }) {
         onChangeText={setDescription}
         multiline
         onContentSizeChange={(e) => setDescHeight(e.nativeEvent.contentSize.height)}
+        outlineColor="#B0B0B0"
+        activeOutlineColor="#4A90E2"
         style={[styles.input, { height: Math.max(80, descHeight) }]}
       />
       {description ? <Markdown style={{ marginBottom: 8 }}>{description}</Markdown> : null}
@@ -164,33 +160,22 @@ export default function TaskFormScreen({ navigation, route }) {
           setTempDate(date ? new Date(`${date}T00:00:00`) : new Date());
           setShowDatePicker(true);
         }}
+        outlineColor="#B0B0B0"
+        activeOutlineColor="#4A90E2"
         style={styles.input}
       />
-      {showDatePicker && (
-        <Portal>
-          <Dialog visible onDismiss={() => setShowDatePicker(false)}>
-            <Dialog.Content>
-              <DateTimePicker
-                value={tempDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                themeVariant={paperTheme.dark ? 'dark' : 'light'}
-                onChange={onDateChange}
-              />
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button
-                onPress={() => {
-                  setShowDatePicker(false);
-                  setDate(tempDate.toISOString().split('T')[0]);
-                }}
-              >
-                Готово
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
-      )}
+      <IOSDatePicker
+        open={showDatePicker}
+        date={tempDate}
+        mode="date"
+        dark={paperTheme.dark}
+        onConfirm={(d) => {
+          setShowDatePicker(false);
+          setTempDate(d);
+          setDate(d.toISOString().split('T')[0]);
+        }}
+        onCancel={() => setShowDatePicker(false)}
+      />
 
       <TextInput
         mode="outlined"
@@ -201,39 +186,30 @@ export default function TaskFormScreen({ navigation, route }) {
           setTempTime(time ? new Date(`1970-01-01T${time}:00`) : new Date());
           setShowTimePicker(true);
         }}
+        outlineColor="#B0B0B0"
+        activeOutlineColor="#4A90E2"
         style={styles.input}
       />
-      {showTimePicker && (
-        <Portal>
-          <Dialog visible onDismiss={() => setShowTimePicker(false)}>
-            <Dialog.Content>
-              <DateTimePicker
-                value={tempTime}
-                mode="time"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                themeVariant={paperTheme.dark ? 'dark' : 'light'}
-                onChange={onTimeChange}
-              />
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button
-                onPress={() => {
-                  setShowTimePicker(false);
-                  const iso = tempTime.toISOString();
-                  setTime(iso.split('T')[1].slice(0, 5));
-                }}
-              >
-                Готово
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
-      )}
+      <IOSDatePicker
+        open={showTimePicker}
+        date={tempTime}
+        mode="time"
+        dark={paperTheme.dark}
+        onConfirm={(t) => {
+          setShowTimePicker(false);
+          setTempTime(t);
+          const iso = t.toISOString();
+          setTime(iso.split('T')[1].slice(0, 5));
+        }}
+        onCancel={() => setShowTimePicker(false)}
+      />
       <TextInput
         mode="outlined"
         label="Адрес"
         value={address}
         onChangeText={setAddress}
+        outlineColor="#B0B0B0"
+        activeOutlineColor="#4A90E2"
         style={styles.input}
       />
       <Menu
@@ -263,7 +239,7 @@ export default function TaskFormScreen({ navigation, route }) {
         ))}
       </Menu>
 
-      <SegmentedButtons
+      <SegmentedControl
         value={status}
         onValueChange={setStatus}
         style={{ marginBottom: 12 }}
@@ -271,13 +247,13 @@ export default function TaskFormScreen({ navigation, route }) {
       />
 
       <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
-        <Switch value={pinned} onValueChange={setPinned} />
+        <IOSSwitch value={pinned} onValueChange={setPinned} />
         <Text style={{ marginLeft: 8 }}>Закрепить</Text>
       </View>
 
-      <Button mode="contained" onPress={handleSave}>
+      <PrimaryButton onPress={handleSave}>
         {editingTask ? 'Обновить' : 'Сохранить'}
-      </Button>
+      </PrimaryButton>
 
       <Portal>
         <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
@@ -297,10 +273,13 @@ export default function TaskFormScreen({ navigation, route }) {
             </RadioButton.Group>
             {repeat === 'custom' && (
               <TextInput
+                mode="outlined"
                 label="Интервал (дней)"
                 keyboardType="number-pad"
                 value={customDays}
                 onChangeText={setCustomDays}
+                outlineColor="#B0B0B0"
+                activeOutlineColor="#4A90E2"
                 style={{ marginTop: 8 }}
               />
             )}
