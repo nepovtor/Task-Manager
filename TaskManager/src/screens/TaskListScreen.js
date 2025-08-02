@@ -163,13 +163,9 @@ export default function TaskListScreen({ navigation }) {
   };
 
   return (
-    <Animated.View
+    <View
       {...panResponder.panHandlers}
-      style={{
-        flex: 1,
-        backgroundColor: paperTheme.colors.background,
-        transform: [{ translateX: slideAnim }],
-      }}
+      style={{ flex: 1, backgroundColor: paperTheme.colors.background }}
     >
       {/* Appbar с меню сортировки */}
       <Appbar.Header style={{ height: 48 }}>
@@ -303,7 +299,8 @@ export default function TaskListScreen({ navigation }) {
         </Menu>
       </Appbar.Header>
 
-      <Searchbar
+      <Animated.View style={{ flex: 1, transform: [{ translateX: slideAnim }] }}>
+        <Searchbar
         placeholder={i18n.t('search', { defaultValue: 'Поиск' })}
         value={searchQuery}
         onChangeText={setSearchQuery}
@@ -354,20 +351,21 @@ export default function TaskListScreen({ navigation }) {
         />
       )}
 
-      {/* Кнопка добавления задачи */}
-      <FAB
-        style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
-        icon="plus"
-        onPress={() => navigation.navigate('TaskForm')}
-        size="small"
-      />
-      <Snackbar
-        visible={!!snackbar}
-        onDismiss={() => setSnackbar('')}
-        duration={1500}
-      >
-        {snackbar}
-      </Snackbar>
-    </Animated.View>
+        {/* Кнопка добавления задачи */}
+        <FAB
+          style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
+          icon="plus"
+          onPress={() => navigation.navigate('TaskForm')}
+          size="small"
+        />
+        <Snackbar
+          visible={!!snackbar}
+          onDismiss={() => setSnackbar('')}
+          duration={1500}
+        >
+          {snackbar}
+        </Snackbar>
+      </Animated.View>
+    </View>
   );
 }
