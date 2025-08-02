@@ -31,6 +31,7 @@ export default function TaskDetailScreen({ route, navigation }) {
       <Text>Адрес: {currentTask.address}</Text>
       <Text>Категория: {currentTask.category}</Text>
       <Text>Статус: {currentTask.status}</Text>
+      <Text>Приоритет: {currentTask.priority}</Text>
 
       <Button
         mode="contained"

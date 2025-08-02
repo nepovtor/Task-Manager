@@ -17,6 +17,17 @@ const statusColor = (status) => {
   }
 };
 
+const priorityColor = (priority) => {
+  switch (priority) {
+    case 'Высокий':
+      return '#E53935';
+    case 'Средний':
+      return '#FB8C00';
+    default:
+      return '#43A047';
+  }
+};
+
 const categoryIcon = (category) => {
   switch (category) {
     case 'Работа':
@@ -49,6 +60,17 @@ const TaskItem = ({ task, onPress, onToggle, onLongPress }) => {
               >
                 {task.status}
               </Badge>
+              {task.priority && (
+                <Badge
+                  style={{
+                    backgroundColor: priorityColor(task.priority),
+                    color: '#FFFFFF',
+                    marginLeft: 4,
+                  }}
+                >
+                  {task.priority}
+                </Badge>
+              )}
               {overdue && (
                 <Badge
                   style={{
