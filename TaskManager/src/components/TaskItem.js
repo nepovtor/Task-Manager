@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Card, IconButton, Avatar, Text, Badge } from 'react-native-paper';
+import { Card, IconButton, Avatar, Text, Badge, ProgressBar } from 'react-native-paper';
 import styles from '../styles/styles';
 import formatDate from '../utils/formatDate';
 
@@ -41,6 +41,8 @@ const categoryIcon = (category) => {
 
 const TaskItem = ({ task, onPress, onToggle, onLongPress }) => {
   const overdue = new Date(task.date) < new Date() && task.status === 'В процессе';
+  const completed = task.subtasks?.filter((s) => s.done).length || 0;
+  const total = task.subtasks?.length || 0;
   return (
     <Card style={styles.item} onPress={onPress} onLongPress={onLongPress} mode="elevated">
       <Card.Content
@@ -91,6 +93,9 @@ const TaskItem = ({ task, onPress, onToggle, onLongPress }) => {
           <IconButton icon={task.pinned ? 'pin' : 'pin-outline'} onPress={onToggle} size={18} />
         </View>
       </Card.Content>
+      {total > 0 && (
+        <ProgressBar progress={completed / total} style={{ marginTop: 4 }} />
+      )}
     </Card>
   );
 };
