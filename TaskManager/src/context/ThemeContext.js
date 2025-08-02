@@ -5,7 +5,8 @@ import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
 const systemFont = Platform.select({ ios: 'System', android: 'sans-serif' });
 const baseFonts = {};
-const DEFAULT_ACCENT = Platform.select({ ios: '#007AFF', android: '#6200EE', default: '#1F2937' });
+// Default accent aligns with design spec (#4A90E2)
+const DEFAULT_ACCENT = '#4A90E2';
 Object.keys(MD3LightTheme.fonts).forEach((k) => {
   baseFonts[k] = { ...MD3LightTheme.fonts[k], fontFamily: systemFont };
 });
@@ -22,6 +23,7 @@ const createThemes = (accent) => ({
       surface: '#F5F5F5',
       onBackground: '#000000',
       onSurface: '#000000',
+      onSurfaceVariant: '#555555',
     },
   },
   dark: {
@@ -31,10 +33,11 @@ const createThemes = (accent) => ({
       ...MD3DarkTheme.colors,
       primary: accent,
       secondary: accent,
-      background: '#000000',
+      background: '#1E1E1E',
       surface: '#121212',
       onBackground: '#FFFFFF',
       onSurface: '#FFFFFF',
+      onSurfaceVariant: '#B0B0B0',
     },
   },
 });

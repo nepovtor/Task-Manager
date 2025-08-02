@@ -2,12 +2,11 @@ import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   item: {
-    marginVertical: 2,
+    marginVertical: 4,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    elevation: 0,
-    paddingVertical: 4,
+    elevation: 1,
+    paddingVertical: 8,
+    height: 64,
   },
   title: {
     fontSize: 16,
@@ -15,7 +14,7 @@ export default StyleSheet.create({
   },
   secondary: {
     fontSize: 12,
-    color: '#777',
+    color: '#B0B0B0',
   },
   fab: {
   position: 'absolute',
