@@ -8,6 +8,7 @@ import * as FileSystem from 'expo-file-system';
 import { useTasks } from '../context/TaskContext';
 import { TASK_STATUSES } from '../constants';
 import styles from '../styles/styles';
+import MiniCalendar from '../components/MiniCalendar';
 
 export default function MonthTasksScreen({ route, navigation }) {
   const { monthOffset = 0 } = route.params || {};
@@ -19,6 +20,7 @@ export default function MonthTasksScreen({ route, navigation }) {
 
   const [monthDate, setMonthDate] = useState(initial);
   const [showPicker, setShowPicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const month = monthDate.getMonth();
   const year = monthDate.getFullYear();
@@ -30,9 +32,16 @@ export default function MonthTasksScreen({ route, navigation }) {
     })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
+  const displayTasks = selectedDate
+    ? monthTasks.filter(
+        (t) =>
+          new Date(t.date).toISOString().split('T')[0] === selectedDate,
+      )
+    : monthTasks;
+
   const sections = TASK_STATUSES.map((status) => ({
     title: status,
-    data: monthTasks.filter((t) => t.status === status),
+    data: displayTasks.filter((t) => t.status === status),
   }));
 
   const monthLabel = monthDate.toLocaleDateString('ru-RU', {
@@ -76,9 +85,10 @@ export default function MonthTasksScreen({ route, navigation }) {
   };
 
   const highlightStyle = (date) => {
-    const today = new Date();
     const d = new Date(date);
-    if (d.toDateString() === today.toDateString()) {
+    const dayString = d.toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0];
+    if (dayString === today || dayString === selectedDate) {
       return { backgroundColor: '#e3f2fd' };
     }
     return null;
@@ -100,6 +110,18 @@ export default function MonthTasksScreen({ route, navigation }) {
           onChange={onChangeDate}
         />
       )}
+      <MiniCalendar
+        tasks={monthTasks}
+        monthDate={monthDate}
+        selectedDate={selectedDate}
+        onSelectDate={(d) =>
+          setSelectedDate((prev) => (prev === d ? null : d))
+        }
+        onChangeMonth={(d) => {
+          setMonthDate(d);
+          setSelectedDate(null);
+        }}
+      />
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id}
