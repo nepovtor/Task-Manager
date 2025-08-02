@@ -8,7 +8,7 @@ import * as Linking from 'expo-linking';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen() {
-  const { accentColor, setAccentColor, toggleTheme, theme } = useThemePreferences();
+  const { accentColor, setAccentColor } = useThemePreferences();
   const paper = useTheme();
   const colors = ['#6750A4', '#ff5722', '#009688'];
   const [notifStatus, setNotifStatus] = useState('unknown');
@@ -27,14 +27,6 @@ export default function SettingsScreen() {
     <View style={{ flex: 1, padding: 16, backgroundColor: paper.colors.background }}>
       <List.Section>
         <List.Subheader>Отображение</List.Subheader>
-        <List.Item
-          title={theme === 'light' ? 'Тёмная тема' : 'Светлая тема'}
-          onPress={() => {
-            toggleTheme();
-            setSnackbar('Тема изменена');
-          }}
-          left={() => <List.Icon icon="theme-light-dark" />}
-        />
         <RadioButton.Group onValueChange={setAccentColor} value={accentColor}>
           {colors.map((c) => (
             <RadioButton.Item key={c} label={c} value={c} color={c} />
