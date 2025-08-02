@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { Text, Button } from 'react-native-paper';
+import { Text, Button, Checkbox, ProgressBar } from 'react-native-paper';
 import { useThemePreferences } from '../context/ThemeContext';
 import { useTasks } from '../context/TaskContext';
 import { TASK_STATUSES } from '../constants';
@@ -23,6 +23,20 @@ export default function TaskDetailScreen({ route, navigation }) {
     navigation.goBack();
   };
 
+  const toggleSubtask = async (id) => {
+    const updated = {
+      ...currentTask,
+      subtasks: currentTask.subtasks.map((st) =>
+        st.id === id ? { ...st, done: !st.done } : st
+      ),
+    };
+    setCurrentTask(updated);
+    await updateTask(updated);
+  };
+
+  const completed = currentTask.subtasks?.filter((s) => s.done).length || 0;
+  const total = currentTask.subtasks?.length || 0;
+
   return (
     <View style={{ flex: 1, padding: 16, backgroundColor: paperTheme.colors.background }}>
       <Text variant="titleLarge">{currentTask.title}</Text>
@@ -31,6 +45,22 @@ export default function TaskDetailScreen({ route, navigation }) {
       <Text>Адрес: {currentTask.address}</Text>
       <Text>Категория: {currentTask.category}</Text>
       <Text>Статус: {currentTask.status}</Text>
+      <Text>Приоритет: {currentTask.priority}</Text>
+
+      {total > 0 && (
+        <View style={{ marginVertical: 8 }}>
+          <ProgressBar progress={completed / total} style={{ marginBottom: 8 }} />
+          {currentTask.subtasks.map((st) => (
+            <View key={st.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Checkbox
+                status={st.done ? 'checked' : 'unchecked'}
+                onPress={() => toggleSubtask(st.id)}
+              />
+              <Text>{st.title}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       <Button
         mode="contained"

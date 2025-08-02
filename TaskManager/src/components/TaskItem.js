@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Card, IconButton, Avatar, Text, Badge } from 'react-native-paper';
+import { Card, IconButton, Avatar, Text, Badge, ProgressBar } from 'react-native-paper';
 import styles from '../styles/styles';
 import formatDate from '../utils/formatDate';
 
@@ -17,6 +17,17 @@ const statusColor = (status) => {
   }
 };
 
+const priorityColor = (priority) => {
+  switch (priority) {
+    case 'Высокий':
+      return '#E53935';
+    case 'Средний':
+      return '#FB8C00';
+    default:
+      return '#43A047';
+  }
+};
+
 const categoryIcon = (category) => {
   switch (category) {
     case 'Работа':
@@ -30,6 +41,8 @@ const categoryIcon = (category) => {
 
 const TaskItem = ({ task, onPress, onToggle, onLongPress }) => {
   const overdue = new Date(task.date) < new Date() && task.status === 'В процессе';
+  const completed = task.subtasks?.filter((s) => s.done).length || 0;
+  const total = task.subtasks?.length || 0;
   return (
     <Card style={styles.item} onPress={onPress} onLongPress={onLongPress} mode="elevated">
       <Card.Content
@@ -49,6 +62,17 @@ const TaskItem = ({ task, onPress, onToggle, onLongPress }) => {
               >
                 {task.status}
               </Badge>
+              {task.priority && (
+                <Badge
+                  style={{
+                    backgroundColor: priorityColor(task.priority),
+                    color: '#FFFFFF',
+                    marginLeft: 4,
+                  }}
+                >
+                  {task.priority}
+                </Badge>
+              )}
               {overdue && (
                 <Badge
                   style={{
@@ -69,6 +93,9 @@ const TaskItem = ({ task, onPress, onToggle, onLongPress }) => {
           <IconButton icon={task.pinned ? 'pin' : 'pin-outline'} onPress={onToggle} size={18} />
         </View>
       </Card.Content>
+      {total > 0 && (
+        <ProgressBar progress={completed / total} style={{ marginTop: 4 }} />
+      )}
     </Card>
   );
 };

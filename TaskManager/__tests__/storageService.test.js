@@ -22,16 +22,17 @@ describe('storageService', () => {
   });
 
   test('getTasks returns parsed tasks', async () => {
-    const tasks = [{ id: '1', title: 't' }];
+    const tasks = [{ id: '1', title: 't', priority: 'Высокий' }];
     AsyncStorage.getItem.mockResolvedValue(JSON.stringify(tasks));
     const res = await getTasks();
-    expect(res[0].id).toBe('1');
+    expect(res[0].priority).toBe('Высокий');
   });
 
   test('saveTask stores new task', async () => {
     AsyncStorage.getItem.mockResolvedValue('[]');
-    await saveTask({ id: '1' });
-    expect(AsyncStorage.setItem).toHaveBeenCalled();
+    await saveTask({ id: '1', subtasks: [{ id: 's1', title: 'st', done: false }] });
+    const saved = JSON.parse(AsyncStorage.setItem.mock.calls[0][1]);
+    expect(saved[0].subtasks[0].title).toBe('st');
   });
 
   test('deleteTask removes task', async () => {

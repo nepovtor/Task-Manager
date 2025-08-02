@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
-import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton, Text, Menu } from 'react-native-paper';
+import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton, Text, Menu, Checkbox, IconButton } from 'react-native-paper';
 import IOSSwitch from '../components/IOSSwitch';
 import PrimaryButton from '../components/PrimaryButton';
 import SegmentedControl from '../components/SegmentedControl';
@@ -10,7 +10,7 @@ import styles from '../styles/styles';
 import { useThemePreferences } from '../context/ThemeContext';
 import { useTasks } from '../context/TaskContext';
 import { scheduleTaskNotification, cancelTaskNotification } from '../services/notificationService';
-import { TASK_STATUSES } from '../constants';
+import { TASK_STATUSES, TASK_PRIORITIES } from '../constants';
 
 const categoryIcon = (category) => {
   switch (category) {
@@ -42,10 +42,13 @@ export default function TaskFormScreen({ navigation, route }) {
   const [pinned, setPinned] = useState(false);
   const [category, setCategory] = useState('Работа');
   const [status, setStatus] = useState(TASK_STATUSES[0]);
+  const [priority, setPriority] = useState(TASK_PRIORITIES[1]);
   const [categoryMenuVisible, setCategoryMenuVisible] = useState(false);
   const [descHeight, setDescHeight] = useState(80);
   const [tempDate, setTempDate] = useState(now);
   const [tempTime, setTempTime] = useState(now);
+  const [subtasks, setSubtasks] = useState([]);
+  const [subtaskText, setSubtaskText] = useState('');
   const editingTask = route.params?.task;
 
   useEffect(() => {
@@ -62,10 +65,33 @@ export default function TaskFormScreen({ navigation, route }) {
       setCategory(editingTask.category || 'Работа');
       setPinned(editingTask.pinned || false);
       setStatus(editingTask.status || TASK_STATUSES[0]);
+      setPriority(editingTask.priority || TASK_PRIORITIES[1]);
       setTempDate(new Date(editingTask.date));
       setTempTime(new Date(editingTask.date));
+      setSubtasks(editingTask.subtasks || []);
     }
   }, [editingTask]);
+
+
+  const addSubtask = () => {
+    if (subtaskText.trim()) {
+      setSubtasks((prev) => [
+        ...prev,
+        { id: Date.now().toString(), title: subtaskText.trim(), done: false },
+      ]);
+      setSubtaskText('');
+    }
+  };
+
+  const toggleSubtask = (id) => {
+    setSubtasks((prev) =>
+      prev.map((st) => (st.id === id ? { ...st, done: !st.done } : st))
+    );
+  };
+
+  const removeSubtask = (id) => {
+    setSubtasks((prev) => prev.filter((st) => st.id !== id));
+  };
 
 
   const handleSave = () => {
@@ -96,6 +122,8 @@ export default function TaskFormScreen({ navigation, route }) {
       date: taskDateTime.toISOString(),
       address,
       status,
+      priority,
+      subtasks,
       reminder: reminderTime,
       repeat,
       customDays: repeat === 'custom' ? parseInt(customDays, 10) : undefined,
@@ -246,6 +274,36 @@ export default function TaskFormScreen({ navigation, route }) {
         style={{ marginBottom: 12 }}
         buttons={TASK_STATUSES.map((s) => ({ value: s, label: s }))}
       />
+
+      <SegmentedControl
+        value={priority}
+        onValueChange={setPriority}
+        style={{ marginBottom: 12 }}
+        buttons={TASK_PRIORITIES.map((p) => ({ value: p, label: p }))}
+      />
+
+      {subtasks.map((st) => (
+        <View key={st.id} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+          <Checkbox
+            status={st.done ? 'checked' : 'unchecked'}
+            onPress={() => toggleSubtask(st.id)}
+          />
+          <Text style={{ flex: 1 }}>{st.title}</Text>
+          <IconButton icon="delete" size={20} onPress={() => removeSubtask(st.id)} />
+        </View>
+      ))}
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+        <TextInput
+          mode="outlined"
+          label="Новая подзадача"
+          value={subtaskText}
+          onChangeText={setSubtaskText}
+          style={{ flex: 1, marginRight: 8 }}
+          outlineColor={paperTheme.colors.outline}
+          activeOutlineColor={paperTheme.colors.primary}
+        />
+        <IconButton icon="plus" mode="contained-tonal" onPress={addSubtask} />
+      </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
         <IOSSwitch value={pinned} onValueChange={setPinned} />
