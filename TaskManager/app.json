@@ -5,11 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./tasklist.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "splash": {
       "image": "./task-manager/assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -19,14 +19,19 @@
     ],
     "ios": {
       "bundleIdentifier": "com.nepovtor.taskmanager",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "userInterfaceStyle": "dark"
     },
     "android": {
       "package": "com.nepovtor.taskmanager",
       "adaptiveIcon": {
         "foregroundImage": "./tasklist.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#000000"
       }
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#000000",
+      "barStyle": "light-content"
     },
     "web": {
       "favicon": "./tasklist.png"

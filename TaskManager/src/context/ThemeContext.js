@@ -55,7 +55,7 @@ const ThemeContext = createContext({
 
 export const ThemeProvider = ({ children }) => {
   const systemScheme = useColorScheme();
-  const [theme, setTheme] = useState(systemScheme || 'light');
+  const [theme, setTheme] = useState(systemScheme || 'dark');
   const [accentColor, setAccentColorState] = useState(DEFAULT_ACCENT);
 
   useEffect(() => {
