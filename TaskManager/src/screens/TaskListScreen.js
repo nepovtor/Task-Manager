@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, SectionList, Animated, LayoutAnimation } from 'react-native';
-import { FAB, Appbar, Menu, Searchbar, Text, Button, Divider, Snackbar, List } from 'react-native-paper';
+import { FAB, Appbar, Menu, Searchbar, Text, Button, Divider, Snackbar } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { useTasks } from '../context/TaskContext';
 import { useThemePreferences } from '../context/ThemeContext';
@@ -231,7 +231,9 @@ export default function TaskListScreen({ navigation }) {
             />
           )}
           renderSectionHeader={({ section: { title } }) => (
-            <List.Subheader>{title}</List.Subheader>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionHeaderText}>{title}</Text>
+            </View>
           )}
           ItemSeparatorComponent={Divider}
           contentContainerStyle={{ flexGrow: 1 }}
@@ -243,6 +245,7 @@ export default function TaskListScreen({ navigation }) {
         style={[styles.fab, { backgroundColor: paperTheme.colors.primary }]}
         icon="plus"
         onPress={() => navigation.navigate('TaskForm')}
+        size="small"
       />
       <Snackbar
         visible={!!snackbar}

@@ -1,26 +1,41 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 export default StyleSheet.create({
   item: {
     marginVertical: 4,
     borderRadius: 8,
     elevation: 1,
-    paddingVertical: 8,
-    height: 64,
+    paddingVertical: 4,
+    height: 56,
   },
   title: {
     fontSize: 16,
     fontWeight: '500',
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto' }),
   },
   secondary: {
-    fontSize: 12,
-    color: '#B0B0B0',
+    fontSize: 11,
+    color: '#9E9E9E',
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto' }),
   },
   fab: {
-  position: 'absolute',
-  margin: 16,
-  right: 16,
-  bottom: 16,
+    position: 'absolute',
+    margin: 16,
+    right: 16,
+    bottom: 16,
+    elevation: 4,
+  },
+
+  sectionHeader: {
+    backgroundColor: '#EEEEEE',
+    paddingVertical: 4,
+    paddingHorizontal: 16,
+  },
+  sectionHeaderText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#555555',
+    fontFamily: Platform.select({ ios: 'System', android: 'Roboto' }),
   },
 
   container: {
