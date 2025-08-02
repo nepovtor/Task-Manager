@@ -9,11 +9,11 @@ import formatDate from '../utils/formatDate';
 const statusColor = (status) => {
   switch (status) {
     case 'Завершена':
-      return '#4CAF50';
+      return '#81C784';
     case 'Отменена':
-      return '#9E9E9E';
+      return '#BDBDBD';
     default:
-      return '#4A90E2';
+      return '#64B5F6';
   }
 };
 
@@ -28,33 +28,47 @@ const categoryIcon = (category) => {
   }
 };
 
-const TaskItem = ({ task, onPress, onToggle, onLongPress }) => (
-  <Card style={styles.item} onPress={onPress} onLongPress={onLongPress} mode="elevated">
-    <Card.Content style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-        <Avatar.Icon size={28} icon={categoryIcon(task.category)} style={{ marginRight: 8 }} />
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
-            <Text style={styles.title}>{task.title}</Text>
-            <Badge
-              style={{
-                backgroundColor: statusColor(task.status),
-                color: '#FFFFFF',
-                marginLeft: 4,
-              }}
-            >
-              {task.status}
-            </Badge>
+const TaskItem = ({ task, onPress, onToggle, onLongPress }) => {
+  const overdue = new Date(task.date) < new Date() && task.status === 'В процессе';
+  return (
+    <Card style={styles.item} onPress={onPress} onLongPress={onLongPress} mode="elevated">
+      <Card.Content style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <Avatar.Icon size={24} icon={categoryIcon(task.category)} style={{ marginRight: 8 }} />
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+              <Text style={styles.title}>{task.title}</Text>
+              <Badge
+                style={{
+                  backgroundColor: statusColor(task.status),
+                  color: '#FFFFFF',
+                  marginLeft: 4,
+                }}
+              >
+                {task.status}
+              </Badge>
+              {overdue && (
+                <Badge
+                  style={{
+                    backgroundColor: '#E57373',
+                    color: '#FFFFFF',
+                    marginLeft: 4,
+                  }}
+                >
+                  Просрочено
+                </Badge>
+              )}
+            </View>
+            <Text style={styles.secondary}>{formatDate(task.date)}</Text>
           </View>
-          <Text style={styles.secondary}>{formatDate(task.date)}</Text>
         </View>
-      </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {task.notificationId && <IconButton icon="bell" size={18} />}
-        <IconButton icon={task.pinned ? 'pin' : 'pin-outline'} onPress={onToggle} size={18} />
-      </View>
-    </Card.Content>
-  </Card>
-);
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {task.notificationId && <IconButton icon="bell" size={18} />}
+          <IconButton icon={task.pinned ? 'pin' : 'pin-outline'} onPress={onToggle} size={18} />
+        </View>
+      </Card.Content>
+    </Card>
+  );
+};
 
 export default TaskItem;
