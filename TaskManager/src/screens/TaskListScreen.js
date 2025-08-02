@@ -1,6 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, SectionList, Animated, LayoutAnimation } from 'react-native';
-import { FAB, Appbar, Menu, Searchbar, Text, Button, Divider, Snackbar } from 'react-native-paper';
+import {
+  FAB,
+  Appbar,
+  Menu,
+  Searchbar,
+  Text,
+  Button,
+  Divider,
+  Snackbar,
+} from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { useTasks } from '../context/TaskContext';
 import { useThemePreferences } from '../context/ThemeContext';
@@ -24,6 +33,9 @@ export default function TaskListScreen({ navigation }) {
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [language, setLanguage] = useState(i18n.locale);
+  const [menuStage, setMenuStage] = useState('main'); // main | display | tasks | months | system
+  const [dayOffset, setDayOffset] = useState(0);
+  const [dayTitle, setDayTitle] = useState('Сегодня');
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -38,7 +50,7 @@ export default function TaskListScreen({ navigation }) {
     if (isFocused) {
       updateList();
     }
-  }, [isFocused, filterStatus, searchQuery, storedTasks, sortType]);
+  }, [isFocused, filterStatus, searchQuery, storedTasks, sortType, dayOffset]);
 
   const updateList = () => {
     let list = storedTasks || [];
@@ -50,9 +62,11 @@ export default function TaskListScreen({ navigation }) {
       list = list.filter((t) => t.title.toLowerCase().includes(q));
     }
     const sorted = sortTasks(list, sortType);
+    const { filtered, title } = groupByDate(sorted, dayOffset);
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setTasks(sorted);
-    setSections(groupByDate(sorted));
+    setTasks(filtered);
+    setDayTitle(title);
+    setSections(filtered.length ? [{ title, data: filtered }] : []);
   };
 
   const sortTasks = (tasksArray, type) => {
@@ -70,14 +84,18 @@ export default function TaskListScreen({ navigation }) {
   const changeSort = (type) => {
     setSortType(type);
     const sorted = sortTasks(tasks, type);
-    setTasks(sorted);
-    setSections(groupByDate(sorted));
+    const { filtered, title } = groupByDate(sorted, dayOffset);
+    setTasks(filtered);
+    setDayTitle(title);
+    setSections(filtered.length ? [{ title, data: filtered }] : []);
     setSettingsVisible(false);
+    setMenuStage('main');
   };
 
   const changeFilter = (status) => {
     setFilterStatus(status);
     setSettingsVisible(false);
+    setMenuStage('main');
   };
 
   const handleTogglePin = async (id) => {
@@ -88,30 +106,29 @@ export default function TaskListScreen({ navigation }) {
         sortType,
       );
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setTasks(updatedTasks);
-      setSections(groupByDate(updatedTasks));
+      const { filtered, title } = groupByDate(updatedTasks, dayOffset);
+      setTasks(filtered);
+      setDayTitle(title);
+      setSections(filtered.length ? [{ title, data: filtered }] : []);
     }
   };
 
-  const groupByDate = (arr) => {
+  const groupByDate = (arr, offset) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const groups = {};
-    arr.forEach((task) => {
+    const target = new Date(today);
+    target.setDate(today.getDate() + offset);
+    const filtered = arr.filter((task) => {
       const d = new Date(task.date);
-      const day = new Date(d);
-      day.setHours(0, 0, 0, 0);
-      const diff = Math.round((day - today) / 86400000);
-      let title;
-      if (diff === 0) title = 'Сегодня';
-      else if (diff === 1) title = 'Завтра';
-      else if (diff > 1) title = `Через ${diff} дня`;
-      else if (diff === -1) title = 'Вчера';
-      else title = formatDate(day.toISOString());
-      if (!groups[title]) groups[title] = { title, data: [], sort: day.getTime() };
-      groups[title].data.push(task);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime() === target.getTime();
     });
-    return Object.values(groups).sort((a, b) => a.sort - b.sort);
+    let title;
+    if (offset === 0) title = 'Сегодня';
+    else if (offset === 1) title = 'Завтра';
+    else if (offset === -1) title = 'Вчера';
+    else title = formatDate(target.toISOString());
+    return { filtered, title };
   };
 
   return (
@@ -125,10 +142,15 @@ export default function TaskListScreen({ navigation }) {
             setSnackbar('Тема изменена');
           }}
         />
-        <Appbar.Content title={i18n.t('taskList')} />
+        <Appbar.Action icon="chevron-left" onPress={() => setDayOffset((o) => o - 1)} />
+        <Appbar.Content title={dayTitle} />
+        <Appbar.Action icon="chevron-right" onPress={() => setDayOffset((o) => o + 1)} />
         <Menu
           visible={settingsVisible}
-          onDismiss={() => setSettingsVisible(false)}
+          onDismiss={() => {
+            setSettingsVisible(false);
+            setMenuStage('main');
+          }}
           anchor={
             <Animated.View
               style={{
@@ -146,58 +168,100 @@ export default function TaskListScreen({ navigation }) {
             </Animated.View>
           }
         >
-          <Menu.Item title="Отображение" disabled />
-          <Menu.Item
-            onPress={() => {
-              toggleTheme();
-              setSnackbar('Тема изменена');
-            }}
-            title={theme === 'light' ? 'Тёмная тема' : 'Светлая тема'}
-          />
-          <Menu.Item
-            onPress={() => {
-              const lang = language === 'ru' ? 'en' : 'ru';
-              i18n.locale = lang;
-              setLanguage(lang);
-              setSnackbar('Язык переключен');
-            }}
-            title={language === 'ru' ? 'Switch to English' : 'Переключить на русский'}
-          />
-          <Divider />
-          <Menu.Item title="Управление задачами" disabled />
-          <Menu.Item onPress={() => changeSort('date')} title="Сортировать по дате" />
-          <Menu.Item onPress={() => changeSort('status')} title="Сортировать по статусу" />
-          <Menu.Item onPress={() => changeFilter('all')} title="Все" />
-          <Menu.Item onPress={() => changeFilter(TASK_STATUSES[0])} title="Активные" />
-          <Menu.Item onPress={() => changeFilter(TASK_STATUSES[1])} title="Завершённые" />
-          <Menu.Item onPress={() => changeFilter(TASK_STATUSES[2])} title="Отменённые" />
-          <Divider />
-          <Menu.Item title="По месяцам" disabled />
-          <Menu.Item
-            onPress={() => {
-              setSettingsVisible(false);
-              navigation.navigate('MonthTasks', {
-                monthOffset: 0,
-                title: 'Этот месяц',
-              });
-            }}
-            title="Этот месяц"
-          />
-          <Menu.Item
-            onPress={() => {
-              setSettingsVisible(false);
-              navigation.navigate('MonthTasks', {
-                monthOffset: 1,
-                title: 'Следующий месяц',
-              });
-            }}
-            title="Следующий месяц"
-          />
-          <Divider />
-          <Menu.Item title="Система" disabled />
-          <Menu.Item onPress={() => setNotificationsEnabled(!notificationsEnabled)} title={notificationsEnabled ? 'Отключить уведомления' : 'Включить уведомления'} />
-          <Menu.Item onPress={() => { setSettingsVisible(false); navigation.navigate('About'); }} title="О приложении" />
-          <Menu.Item onPress={() => { setSettingsVisible(false); navigation.navigate('Settings'); }} title="Расширенные настройки" />
+          {menuStage === 'main' && (
+            <>
+              <Menu.Item onPress={() => setMenuStage('display')} title="Отображение" />
+              <Menu.Item onPress={() => setMenuStage('tasks')} title="Управление задачами" />
+              <Menu.Item onPress={() => setMenuStage('months')} title="По месяцам" />
+              <Menu.Item onPress={() => setMenuStage('system')} title="Система" />
+            </>
+          )}
+          {menuStage === 'display' && (
+            <>
+              <Menu.Item onPress={() => setMenuStage('main')} title="Назад" />
+              <Divider />
+              <Menu.Item
+                onPress={() => {
+                  toggleTheme();
+                  setSnackbar('Тема изменена');
+                }}
+                title={theme === 'light' ? 'Тёмная тема' : 'Светлая тема'}
+              />
+              <Menu.Item
+                onPress={() => {
+                  const lang = language === 'ru' ? 'en' : 'ru';
+                  i18n.locale = lang;
+                  setLanguage(lang);
+                  setSnackbar('Язык переключен');
+                }}
+                title={language === 'ru' ? 'Switch to English' : 'Переключить на русский'}
+              />
+            </>
+          )}
+          {menuStage === 'tasks' && (
+            <>
+              <Menu.Item onPress={() => setMenuStage('main')} title="Назад" />
+              <Divider />
+              <Menu.Item onPress={() => changeFilter('all')} title="Все" />
+              <Menu.Item onPress={() => changeFilter(TASK_STATUSES[0])} title="Активные" />
+              <Menu.Item onPress={() => changeFilter(TASK_STATUSES[1])} title="Завершённые" />
+              <Menu.Item onPress={() => changeFilter(TASK_STATUSES[2])} title="Отменённые" />
+            </>
+          )}
+          {menuStage === 'months' && (
+            <>
+              <Menu.Item onPress={() => setMenuStage('main')} title="Назад" />
+              <Divider />
+              <Menu.Item
+                onPress={() => {
+                  setSettingsVisible(false);
+                  setMenuStage('main');
+                  navigation.navigate('MonthTasks', {
+                    monthOffset: 0,
+                    title: 'Этот месяц',
+                  });
+                }}
+                title="Этот месяц"
+              />
+              <Menu.Item
+                onPress={() => {
+                  setSettingsVisible(false);
+                  setMenuStage('main');
+                  navigation.navigate('MonthTasks', {
+                    monthOffset: 0,
+                    title: 'Календарь',
+                  });
+                }}
+                title="Календарь"
+              />
+            </>
+          )}
+          {menuStage === 'system' && (
+            <>
+              <Menu.Item onPress={() => setMenuStage('main')} title="Назад" />
+              <Divider />
+              <Menu.Item
+                onPress={() => setNotificationsEnabled(!notificationsEnabled)}
+                title={notificationsEnabled ? 'Отключить уведомления' : 'Включить уведомления'}
+              />
+              <Menu.Item
+                onPress={() => {
+                  setSettingsVisible(false);
+                  setMenuStage('main');
+                  navigation.navigate('About');
+                }}
+                title="О приложении"
+              />
+              <Menu.Item
+                onPress={() => {
+                  setSettingsVisible(false);
+                  setMenuStage('main');
+                  navigation.navigate('Settings');
+                }}
+                title="Расширенные настройки"
+              />
+            </>
+          )}
         </Menu>
       </Appbar.Header>
 
