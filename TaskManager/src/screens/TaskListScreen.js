@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, SectionList, Animated, LayoutAnimation } from 'react-native';
+import { View, SectionList, Animated, LayoutAnimation, PanResponder } from 'react-native';
 import {
   FAB,
   Appbar,
@@ -37,6 +37,16 @@ export default function TaskListScreen({ navigation }) {
   const [dayOffset, setDayOffset] = useState(0);
   const [dayTitle, setDayTitle] = useState('Сегодня');
   const isFocused = useIsFocused();
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dx) > 20 && Math.abs(gestureState.dy) < 20,
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dx > 50) setDayOffset((o) => o - 1);
+        else if (gestureState.dx < -50) setDayOffset((o) => o + 1);
+      },
+    }),
+  ).current;
 
   useEffect(() => {
     Animated.timing(anim, {
@@ -132,7 +142,10 @@ export default function TaskListScreen({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: paperTheme.colors.background }}>
+    <View
+      {...panResponder.panHandlers}
+      style={{ flex: 1, backgroundColor: paperTheme.colors.background }}
+    >
       {/* Appbar с меню сортировки */}
       <Appbar.Header style={{ height: 48 }}>
         <Appbar.Action
@@ -295,8 +308,20 @@ export default function TaskListScreen({ navigation }) {
             />
           )}
           renderSectionHeader={({ section: { title } }) => (
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>{title}</Text>
+            <View
+              style={[
+                styles.sectionHeader,
+                { backgroundColor: paperTheme.colors.surface },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.sectionHeaderText,
+                  { color: paperTheme.colors.onSurface },
+                ]}
+              >
+                {title}
+              </Text>
             </View>
           )}
           ItemSeparatorComponent={Divider}

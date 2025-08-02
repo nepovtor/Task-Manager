@@ -107,7 +107,7 @@ export default function MonthTasksScreen({ route, navigation }) {
     const dayString = d.toISOString().split('T')[0];
     const today = new Date().toISOString().split('T')[0];
     if (dayString === today || selectedDates.includes(dayString)) {
-      return { backgroundColor: '#e3f2fd' };
+      return { backgroundColor: paper.colors.surfaceVariant };
     }
     return null;
   };
