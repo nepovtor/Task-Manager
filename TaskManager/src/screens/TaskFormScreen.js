@@ -124,6 +124,7 @@ export default function TaskFormScreen({ navigation, route }) {
       status,
       priority,
       subtasks,
+      
       reminder: reminderTime,
       repeat,
       customDays: repeat === 'custom' ? parseInt(customDays, 10) : undefined,

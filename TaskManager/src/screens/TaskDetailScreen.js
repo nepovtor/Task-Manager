@@ -62,6 +62,7 @@ export default function TaskDetailScreen({ route, navigation }) {
         </View>
       )}
 
+
       <Button
         mode="contained"
         onPress={() => navigation.navigate('TaskForm', { task: currentTask })}
