@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, FlatList, Animated } from 'react-native';
-import { FAB, Appbar, Menu, Searchbar, Text, Button, Divider, Snackbar } from 'react-native-paper';
+import { View, SectionList, Animated, LayoutAnimation } from 'react-native';
+import { FAB, Appbar, Menu, Searchbar, Text, Button, Divider, Snackbar, List } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import { useTasks } from '../context/TaskContext';
 import { useThemePreferences } from '../context/ThemeContext';
@@ -9,11 +9,13 @@ import { TASK_STATUSES } from '../constants';
 import TaskItem from '../components/TaskItem';
 import TaskWidget from '../components/TaskWidget';
 import styles from '../styles/styles';
+import formatDate from '../utils/formatDate';
 
 export default function TaskListScreen({ navigation }) {
   const { tasks: storedTasks, togglePin } = useTasks();
   const { theme, toggleTheme, paperTheme } = useThemePreferences();
   const [tasks, setTasks] = useState([]);
+  const [sections, setSections] = useState([]);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const anim = useRef(new Animated.Value(0)).current;
   const [snackbar, setSnackbar] = useState('');
@@ -47,7 +49,10 @@ export default function TaskListScreen({ navigation }) {
       const q = searchQuery.toLowerCase();
       list = list.filter((t) => t.title.toLowerCase().includes(q));
     }
-    setTasks(sortTasks(list, sortType));
+    const sorted = sortTasks(list, sortType);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setTasks(sorted);
+    setSections(groupByDate(sorted));
   };
 
   const sortTasks = (tasksArray, type) => {
@@ -64,7 +69,9 @@ export default function TaskListScreen({ navigation }) {
 
   const changeSort = (type) => {
     setSortType(type);
-    setTasks(sortTasks(tasks, type));
+    const sorted = sortTasks(tasks, type);
+    setTasks(sorted);
+    setSections(groupByDate(sorted));
     setSettingsVisible(false);
   };
 
@@ -76,8 +83,35 @@ export default function TaskListScreen({ navigation }) {
   const handleTogglePin = async (id) => {
     const updated = await togglePin(id);
     if (updated) {
-      setTasks((prev) => sortTasks(prev.map((t) => (t.id === id ? updated : t)), sortType));
+      const updatedTasks = sortTasks(
+        tasks.map((t) => (t.id === id ? updated : t)),
+        sortType,
+      );
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setTasks(updatedTasks);
+      setSections(groupByDate(updatedTasks));
     }
+  };
+
+  const groupByDate = (arr) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const groups = {};
+    arr.forEach((task) => {
+      const d = new Date(task.date);
+      const day = new Date(d);
+      day.setHours(0, 0, 0, 0);
+      const diff = Math.round((day - today) / 86400000);
+      let title;
+      if (diff === 0) title = 'Сегодня';
+      else if (diff === 1) title = 'Завтра';
+      else if (diff > 1) title = `Через ${diff} дня`;
+      else if (diff === -1) title = 'Вчера';
+      else title = formatDate(day.toISOString());
+      if (!groups[title]) groups[title] = { title, data: [], sort: day.getTime() };
+      groups[title].data.push(task);
+    });
+    return Object.values(groups).sort((a, b) => a.sort - b.sort);
   };
 
   return (
@@ -177,7 +211,7 @@ export default function TaskListScreen({ navigation }) {
       <TaskWidget tasks={tasks} />
 
       {/* Список задач или пустое состояние */}
-      {tasks.length === 0 ? (
+      {sections.length === 0 ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Text>{i18n.t('noTasks')}</Text>
           <Button mode="contained" onPress={() => navigation.navigate('TaskForm')} style={{ marginTop: 16 }}>
@@ -185,8 +219,8 @@ export default function TaskListScreen({ navigation }) {
           </Button>
         </View>
       ) : (
-        <FlatList
-          data={tasks}
+        <SectionList
+          sections={sections}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <TaskItem
@@ -195,6 +229,9 @@ export default function TaskListScreen({ navigation }) {
               onLongPress={() => navigation.navigate('TaskForm', { task: item })}
               onToggle={() => handleTogglePin(item.id)}
             />
+          )}
+          renderSectionHeader={({ section: { title } }) => (
+            <List.Subheader>{title}</List.Subheader>
           )}
           ItemSeparatorComponent={Divider}
           contentContainerStyle={{ flexGrow: 1 }}

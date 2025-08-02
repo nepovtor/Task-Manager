@@ -2,18 +2,19 @@ import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   item: {
-    marginVertical: 4,
+    marginVertical: 2,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e0e0e0',
     elevation: 0,
+    paddingVertical: 4,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '500',
   },
   secondary: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#777',
   },
   fab: {

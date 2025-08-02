@@ -2,12 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { View, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Markdown from 'react-native-markdown-display';
-import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton, Switch, Text } from 'react-native-paper';
+import { TextInput, Button, Snackbar, Dialog, Portal, RadioButton, Switch, Text, Menu, SegmentedButtons } from 'react-native-paper';
 import styles from '../styles/styles';
 import { useThemePreferences } from '../context/ThemeContext';
 import { useTasks } from '../context/TaskContext';
 import { scheduleTaskNotification, cancelTaskNotification } from '../services/notificationService';
 import { TASK_STATUSES } from '../constants';
+
+const categoryIcon = (category) => {
+  switch (category) {
+    case 'Работа':
+      return 'briefcase';
+    case 'Учёба':
+      return 'school';
+    default:
+      return 'account';
+  }
+};
 
 export default function TaskFormScreen({ navigation, route }) {
   const { addTask, updateTask } = useTasks();
@@ -26,6 +37,11 @@ export default function TaskFormScreen({ navigation, route }) {
   const [customDays, setCustomDays] = useState('1');
   const [pinned, setPinned] = useState(false);
   const [category, setCategory] = useState('Работа');
+  const [status, setStatus] = useState(TASK_STATUSES[0]);
+  const [categoryMenuVisible, setCategoryMenuVisible] = useState(false);
+  const [descHeight, setDescHeight] = useState(80);
+  const [tempDate, setTempDate] = useState(new Date());
+  const [tempTime, setTempTime] = useState(new Date());
   const editingTask = route.params?.task;
 
   useEffect(() => {
@@ -41,6 +57,9 @@ export default function TaskFormScreen({ navigation, route }) {
       setCustomDays(editingTask.customDays ? String(editingTask.customDays) : '1');
       setCategory(editingTask.category || 'Работа');
       setPinned(editingTask.pinned || false);
+      setStatus(editingTask.status || TASK_STATUSES[0]);
+      setTempDate(new Date(editingTask.date));
+      setTempTime(new Date(editingTask.date));
     }
   }, [editingTask]);
 
@@ -72,7 +91,7 @@ export default function TaskFormScreen({ navigation, route }) {
       description,
       date: taskDateTime.toISOString(),
       address,
-      status: editingTask ? editingTask.status : TASK_STATUSES[0],
+      status,
       reminder: reminderTime,
       repeat,
       customDays: repeat === 'custom' ? parseInt(customDays, 10) : undefined,
@@ -103,17 +122,14 @@ export default function TaskFormScreen({ navigation, route }) {
   };
 
   const onDateChange = (_, selectedDate) => {
-    setShowDatePicker(false);
     if (selectedDate) {
-      setDate(selectedDate.toISOString().split('T')[0]);
+      setTempDate(selectedDate);
     }
   };
 
   const onTimeChange = (_, selectedTime) => {
-    setShowTimePicker(false);
     if (selectedTime) {
-      const iso = selectedTime.toISOString();
-      setTime(iso.split('T')[1].slice(0, 5));
+      setTempTime(selectedTime);
     }
   };
 
@@ -131,10 +147,12 @@ export default function TaskFormScreen({ navigation, route }) {
       <TextInput
         mode="outlined"
         label="Описание"
+        placeholder="Добавьте детали задачи…"
         value={description}
         onChangeText={setDescription}
         multiline
-        style={styles.input}
+        onContentSizeChange={(e) => setDescHeight(e.nativeEvent.contentSize.height)}
+        style={[styles.input, { height: Math.max(80, descHeight) }]}
       />
       {description ? <Markdown style={{ marginBottom: 8 }}>{description}</Markdown> : null}
       <TextInput
@@ -142,17 +160,36 @@ export default function TaskFormScreen({ navigation, route }) {
         label="Дата"
         value={date}
         showSoftInputOnFocus={false}
-        onPressIn={() => setShowDatePicker(true)}
+        onPressIn={() => {
+          setTempDate(date ? new Date(`${date}T00:00:00`) : new Date());
+          setShowDatePicker(true);
+        }}
         style={styles.input}
       />
       {showDatePicker && (
-      <DateTimePicker
-        value={date ? new Date(`${date}T00:00:00`) : new Date()}
-        mode="date"
-        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-        themeVariant={paperTheme.dark ? 'dark' : 'light'}
-        onChange={onDateChange}
-      />
+        <Portal>
+          <Dialog visible onDismiss={() => setShowDatePicker(false)}>
+            <Dialog.Content>
+              <DateTimePicker
+                value={tempDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                themeVariant={paperTheme.dark ? 'dark' : 'light'}
+                onChange={onDateChange}
+              />
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button
+                onPress={() => {
+                  setShowDatePicker(false);
+                  setDate(tempDate.toISOString().split('T')[0]);
+                }}
+              >
+                Готово
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
       )}
 
       <TextInput
@@ -160,17 +197,37 @@ export default function TaskFormScreen({ navigation, route }) {
         label="Время"
         value={time}
         showSoftInputOnFocus={false}
-        onPressIn={() => setShowTimePicker(true)}
+        onPressIn={() => {
+          setTempTime(time ? new Date(`1970-01-01T${time}:00`) : new Date());
+          setShowTimePicker(true);
+        }}
         style={styles.input}
       />
       {showTimePicker && (
-      <DateTimePicker
-        value={time ? new Date(`1970-01-01T${time}:00`) : new Date()}
-        mode="time"
-        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-        themeVariant={paperTheme.dark ? 'dark' : 'light'}
-        onChange={onTimeChange}
-      />
+        <Portal>
+          <Dialog visible onDismiss={() => setShowTimePicker(false)}>
+            <Dialog.Content>
+              <DateTimePicker
+                value={tempTime}
+                mode="time"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                themeVariant={paperTheme.dark ? 'dark' : 'light'}
+                onChange={onTimeChange}
+              />
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button
+                onPress={() => {
+                  setShowTimePicker(false);
+                  const iso = tempTime.toISOString();
+                  setTime(iso.split('T')[1].slice(0, 5));
+                }}
+              >
+                Готово
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
       )}
       <TextInput
         mode="outlined"
@@ -179,11 +236,39 @@ export default function TaskFormScreen({ navigation, route }) {
         onChangeText={setAddress}
         style={styles.input}
       />
-      <RadioButton.Group onValueChange={setCategory} value={category}>
-        <RadioButton.Item label="Работа" value="Работа" />
-        <RadioButton.Item label="Учёба" value="Учёба" />
-        <RadioButton.Item label="Личное" value="Личное" />
-      </RadioButton.Group>
+      <Menu
+        visible={categoryMenuVisible}
+        onDismiss={() => setCategoryMenuVisible(false)}
+        anchor={
+          <Button
+            mode="outlined"
+            icon={categoryIcon(category)}
+            onPress={() => setCategoryMenuVisible(true)}
+            style={styles.input}
+          >
+            {category}
+          </Button>
+        }
+      >
+        {['Работа', 'Учёба', 'Личное'].map((c) => (
+          <Menu.Item
+            key={c}
+            onPress={() => {
+              setCategory(c);
+              setCategoryMenuVisible(false);
+            }}
+            title={c}
+            leadingIcon={categoryIcon(c)}
+          />
+        ))}
+      </Menu>
+
+      <SegmentedButtons
+        value={status}
+        onValueChange={setStatus}
+        style={{ marginBottom: 12 }}
+        buttons={TASK_STATUSES.map((s) => ({ value: s, label: s }))}
+      />
 
       <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 8 }}>
         <Switch value={pinned} onValueChange={setPinned} />
