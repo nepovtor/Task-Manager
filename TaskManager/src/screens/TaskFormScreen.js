@@ -26,10 +26,11 @@ const categoryIcon = (category) => {
 export default function TaskFormScreen({ navigation, route }) {
   const { addTask, updateTask } = useTasks();
   const { paperTheme } = useThemePreferences();
+  const now = new Date(Date.now() + 60 * 60 * 1000);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [date, setDate] = useState(now.toISOString().split('T')[0]);
+  const [time, setTime] = useState(now.toISOString().split('T')[1].slice(0,5));
   const [address, setAddress] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -43,8 +44,8 @@ export default function TaskFormScreen({ navigation, route }) {
   const [status, setStatus] = useState(TASK_STATUSES[0]);
   const [categoryMenuVisible, setCategoryMenuVisible] = useState(false);
   const [descHeight, setDescHeight] = useState(80);
-  const [tempDate, setTempDate] = useState(new Date());
-  const [tempTime, setTempTime] = useState(new Date());
+  const [tempDate, setTempDate] = useState(now);
+  const [tempTime, setTempTime] = useState(now);
   const editingTask = route.params?.task;
 
   useEffect(() => {
@@ -134,8 +135,8 @@ export default function TaskFormScreen({ navigation, route }) {
         label="Заголовок"
         value={title}
         onChangeText={setTitle}
-        outlineColor="#B0B0B0"
-        activeOutlineColor="#4A90E2"
+        outlineColor={paperTheme.colors.outline}
+        activeOutlineColor={paperTheme.colors.primary}
         style={styles.input}
       />
       <TextInput
@@ -146,8 +147,8 @@ export default function TaskFormScreen({ navigation, route }) {
         onChangeText={setDescription}
         multiline
         onContentSizeChange={(e) => setDescHeight(e.nativeEvent.contentSize.height)}
-        outlineColor="#B0B0B0"
-        activeOutlineColor="#4A90E2"
+        outlineColor={paperTheme.colors.outline}
+        activeOutlineColor={paperTheme.colors.primary}
         style={[styles.input, { height: Math.max(80, descHeight) }]}
       />
       {description ? <Markdown style={{ marginBottom: 8 }}>{description}</Markdown> : null}
@@ -160,8 +161,8 @@ export default function TaskFormScreen({ navigation, route }) {
           setTempDate(date ? new Date(`${date}T00:00:00`) : new Date());
           setShowDatePicker(true);
         }}
-        outlineColor="#B0B0B0"
-        activeOutlineColor="#4A90E2"
+        outlineColor={paperTheme.colors.outline}
+        activeOutlineColor={paperTheme.colors.primary}
         style={styles.input}
       />
       <IOSDatePicker
@@ -186,8 +187,8 @@ export default function TaskFormScreen({ navigation, route }) {
           setTempTime(time ? new Date(`1970-01-01T${time}:00`) : new Date());
           setShowTimePicker(true);
         }}
-        outlineColor="#B0B0B0"
-        activeOutlineColor="#4A90E2"
+        outlineColor={paperTheme.colors.outline}
+        activeOutlineColor={paperTheme.colors.primary}
         style={styles.input}
       />
       <IOSDatePicker
@@ -208,8 +209,8 @@ export default function TaskFormScreen({ navigation, route }) {
         label="Адрес"
         value={address}
         onChangeText={setAddress}
-        outlineColor="#B0B0B0"
-        activeOutlineColor="#4A90E2"
+        outlineColor={paperTheme.colors.outline}
+        activeOutlineColor={paperTheme.colors.primary}
         style={styles.input}
       />
       <Menu
@@ -278,8 +279,8 @@ export default function TaskFormScreen({ navigation, route }) {
                 keyboardType="number-pad"
                 value={customDays}
                 onChangeText={setCustomDays}
-                outlineColor="#B0B0B0"
-                activeOutlineColor="#4A90E2"
+                outlineColor={paperTheme.colors.outline}
+                activeOutlineColor={paperTheme.colors.primary}
                 style={{ marginTop: 8 }}
               />
             )}
