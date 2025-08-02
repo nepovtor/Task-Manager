@@ -27,14 +27,12 @@ export default StyleSheet.create({
   },
 
   sectionHeader: {
-    backgroundColor: '#EEEEEE',
     paddingVertical: 4,
     paddingHorizontal: 16,
   },
   sectionHeaderText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#555555',
     fontFamily: Platform.select({ ios: 'System', android: 'Roboto' }),
   },
 
