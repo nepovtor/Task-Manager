@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, SectionList, Animated, LayoutAnimation, PanResponder } from 'react-native';
+import {
+  View,
+  SectionList,
+  Animated,
+  LayoutAnimation,
+  PanResponder,
+  Dimensions,
+} from 'react-native';
 import {
   FAB,
   Appbar,
@@ -36,17 +43,35 @@ export default function TaskListScreen({ navigation }) {
   const [menuStage, setMenuStage] = useState('main'); // main | display | tasks | months | system
   const [dayOffset, setDayOffset] = useState(0);
   const [dayTitle, setDayTitle] = useState('Сегодня');
+  const [nextDir, setNextDir] = useState(0);
   const isFocused = useIsFocused();
+  const width = Dimensions.get('window').width;
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  const changeDay = (dir) => {
+    setNextDir(dir);
+    setDayOffset((o) => o + dir);
+  };
+
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gestureState) =>
         Math.abs(gestureState.dx) > 20 && Math.abs(gestureState.dy) < 20,
       onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx > 50) setDayOffset((o) => o - 1);
-        else if (gestureState.dx < -50) setDayOffset((o) => o + 1);
+        if (gestureState.dx > 50) changeDay(-1);
+        else if (gestureState.dx < -50) changeDay(1);
       },
     }),
   ).current;
+
+  useEffect(() => {
+    slideAnim.setValue(nextDir * width);
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [dayOffset]);
 
   useEffect(() => {
     Animated.timing(anim, {
@@ -133,18 +158,18 @@ export default function TaskListScreen({ navigation }) {
       d.setHours(0, 0, 0, 0);
       return d.getTime() === target.getTime();
     });
-    let title;
-    if (offset === 0) title = 'Сегодня';
-    else if (offset === 1) title = 'Завтра';
-    else if (offset === -1) title = 'Вчера';
-    else title = formatDate(target.toISOString());
+    const title = formatDate(target.toISOString());
     return { filtered, title };
   };
 
   return (
-    <View
+    <Animated.View
       {...panResponder.panHandlers}
-      style={{ flex: 1, backgroundColor: paperTheme.colors.background }}
+      style={{
+        flex: 1,
+        backgroundColor: paperTheme.colors.background,
+        transform: [{ translateX: slideAnim }],
+      }}
     >
       {/* Appbar с меню сортировки */}
       <Appbar.Header style={{ height: 48 }}>
@@ -155,9 +180,9 @@ export default function TaskListScreen({ navigation }) {
             setSnackbar('Тема изменена');
           }}
         />
-        <Appbar.Action icon="chevron-left" onPress={() => setDayOffset((o) => o - 1)} />
+        <Appbar.Action icon="chevron-left" onPress={() => changeDay(-1)} />
         <Appbar.Content title={dayTitle} />
-        <Appbar.Action icon="chevron-right" onPress={() => setDayOffset((o) => o + 1)} />
+        <Appbar.Action icon="chevron-right" onPress={() => changeDay(1)} />
         <Menu
           visible={settingsVisible}
           onDismiss={() => {
@@ -343,6 +368,6 @@ export default function TaskListScreen({ navigation }) {
       >
         {snackbar}
       </Snackbar>
-    </View>
+    </Animated.View>
   );
 }
