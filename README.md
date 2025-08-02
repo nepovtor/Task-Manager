@@ -27,7 +27,7 @@
 ## 🚀 Запуск
 
 ```bash
-git clone https://github.com/your-username/task-manager.git
+git clone https://github.com/nepovtor/task-manager.git
 cd task-manager/TaskManager
 npm install
 npx expo start
