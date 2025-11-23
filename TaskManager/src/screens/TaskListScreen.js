@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   SectionList,
@@ -27,11 +27,21 @@ import TaskWidget from '../components/TaskWidget';
 import styles from '../styles/styles';
 import formatDate from '../utils/formatDate';
 
+const sortTasks = (tasksArray, type) => {
+  return [...tasksArray].sort((a, b) => {
+    if (a.pinned !== b.pinned) {
+      return a.pinned ? -1 : 1;
+    }
+    if (type === 'status') {
+      return a.status.localeCompare(b.status);
+    }
+    return new Date(a.date) - new Date(b.date);
+  });
+};
+
 export default function TaskListScreen({ navigation }) {
   const { tasks: storedTasks, togglePin } = useTasks();
   const { theme, toggleTheme, paperTheme } = useThemePreferences();
-  const [tasks, setTasks] = useState([]);
-  const [sections, setSections] = useState([]);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const anim = useRef(new Animated.Value(0)).current;
   const [snackbar, setSnackbar] = useState('');
@@ -42,7 +52,6 @@ export default function TaskListScreen({ navigation }) {
   const [language, setLanguage] = useState(i18n.locale);
   const [menuStage, setMenuStage] = useState('main'); // main | display | tasks | months | system
   const [dayOffset, setDayOffset] = useState(0);
-  const [dayTitle, setDayTitle] = useState('Сегодня');
   const [nextDir, setNextDir] = useState(0);
   const isFocused = useIsFocused();
   const width = Dimensions.get('window').width;
@@ -81,48 +90,52 @@ export default function TaskListScreen({ navigation }) {
     }).start();
   }, [settingsVisible]);
 
+  const targetDate = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const next = new Date(today);
+    next.setDate(today.getDate() + dayOffset);
+    return next;
+  }, [dayOffset]);
+
+  const dayTitle = useMemo(
+    () => formatDate(targetDate.toISOString()),
+    [targetDate],
+  );
+
+  const filteredTasks = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const byDate = (storedTasks || []).filter((task) => {
+      const taskDate = new Date(task.date);
+      taskDate.setHours(0, 0, 0, 0);
+      return taskDate.getTime() === targetDate.getTime();
+    });
+
+    const byStatus =
+      filterStatus === 'all'
+        ? byDate
+        : byDate.filter((task) => task.status === filterStatus);
+
+    const byQuery = query
+      ? byStatus.filter((task) => task.title.toLowerCase().includes(query))
+      : byStatus;
+
+    return sortTasks(byQuery, sortType);
+  }, [storedTasks, filterStatus, searchQuery, sortType, targetDate]);
+
+  const sections = useMemo(
+    () => (filteredTasks.length ? [{ title: dayTitle, data: filteredTasks }] : []),
+    [filteredTasks, dayTitle],
+  );
+
   useEffect(() => {
     if (isFocused) {
-      updateList();
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     }
-  }, [isFocused, filterStatus, searchQuery, storedTasks, sortType, dayOffset]);
-
-  const updateList = () => {
-    let list = storedTasks || [];
-    if (filterStatus !== 'all') {
-      list = list.filter((t) => t.status === filterStatus);
-    }
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter((t) => t.title.toLowerCase().includes(q));
-    }
-    const sorted = sortTasks(list, sortType);
-    const { filtered, title } = groupByDate(sorted, dayOffset);
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setTasks(filtered);
-    setDayTitle(title);
-    setSections(filtered.length ? [{ title, data: filtered }] : []);
-  };
-
-  const sortTasks = (tasksArray, type) => {
-    return [...tasksArray].sort((a, b) => {
-      if (a.pinned !== b.pinned) {
-        return a.pinned ? -1 : 1;
-      }
-      if (type === 'status') {
-        return a.status.localeCompare(b.status);
-      }
-      return new Date(a.date) - new Date(b.date);
-    });
-  };
+  }, [filteredTasks, dayTitle, isFocused]);
 
   const changeSort = (type) => {
     setSortType(type);
-    const sorted = sortTasks(tasks, type);
-    const { filtered, title } = groupByDate(sorted, dayOffset);
-    setTasks(filtered);
-    setDayTitle(title);
-    setSections(filtered.length ? [{ title, data: filtered }] : []);
     setSettingsVisible(false);
     setMenuStage('main');
   };
@@ -136,30 +149,8 @@ export default function TaskListScreen({ navigation }) {
   const handleTogglePin = async (id) => {
     const updated = await togglePin(id);
     if (updated) {
-      const updatedTasks = sortTasks(
-        tasks.map((t) => (t.id === id ? updated : t)),
-        sortType,
-      );
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      const { filtered, title } = groupByDate(updatedTasks, dayOffset);
-      setTasks(filtered);
-      setDayTitle(title);
-      setSections(filtered.length ? [{ title, data: filtered }] : []);
+      setSnackbar(updated.pinned ? 'Задача закреплена' : 'Задача откреплена');
     }
-  };
-
-  const groupByDate = (arr, offset) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const target = new Date(today);
-    target.setDate(today.getDate() + offset);
-    const filtered = arr.filter((task) => {
-      const d = new Date(task.date);
-      d.setHours(0, 0, 0, 0);
-      return d.getTime() === target.getTime();
-    });
-    const title = formatDate(target.toISOString());
-    return { filtered, title };
   };
 
   return (
@@ -301,55 +292,59 @@ export default function TaskListScreen({ navigation }) {
 
       <Animated.View style={{ flex: 1, transform: [{ translateX: slideAnim }] }}>
         <Searchbar
-        placeholder={i18n.t('search', { defaultValue: 'Поиск' })}
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        style={{ margin: 8 }}
-      />
+          placeholder={i18n.t('search', { defaultValue: 'Поиск' })}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          style={{ margin: 8 }}
+        />
 
-      <TaskWidget tasks={tasks} />
+        <TaskWidget tasks={filteredTasks} />
 
-      {/* Список задач или пустое состояние */}
-      {sections.length === 0 ? (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Text>{i18n.t('noTasks')}</Text>
-          <Button mode="contained" onPress={() => navigation.navigate('TaskForm')} style={{ marginTop: 16 }}>
-            {i18n.t('createTask')}
-          </Button>
-        </View>
-      ) : (
-        <SectionList
-          sections={sections}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TaskItem
-              task={item}
-              onPress={() => navigation.navigate('TaskDetail', { task: item })}
-              onLongPress={() => navigation.navigate('TaskForm', { task: item })}
-              onToggle={() => handleTogglePin(item.id)}
-            />
-          )}
-          renderSectionHeader={({ section: { title } }) => (
-            <View
-              style={[
-                styles.sectionHeader,
-                { backgroundColor: paperTheme.colors.surface },
-              ]}
+        {/* Список задач или пустое состояние */}
+        {sections.length === 0 ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <Text>{i18n.t('noTasks')}</Text>
+            <Button
+              mode="contained"
+              onPress={() => navigation.navigate('TaskForm')}
+              style={{ marginTop: 16 }}
             >
-              <Text
+              {i18n.t('createTask')}
+            </Button>
+          </View>
+        ) : (
+          <SectionList
+            sections={sections}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TaskItem
+                task={item}
+                onPress={() => navigation.navigate('TaskDetail', { task: item })}
+                onLongPress={() => navigation.navigate('TaskForm', { task: item })}
+                onToggle={() => handleTogglePin(item.id)}
+              />
+            )}
+            renderSectionHeader={({ section: { title } }) => (
+              <View
                 style={[
-                  styles.sectionHeaderText,
-                  { color: paperTheme.colors.onSurface },
+                  styles.sectionHeader,
+                  { backgroundColor: paperTheme.colors.surface },
                 ]}
               >
-                {title}
-              </Text>
-            </View>
-          )}
-          ItemSeparatorComponent={Divider}
-          contentContainerStyle={{ flexGrow: 1 }}
-        />
-      )}
+                <Text
+                  style={[
+                    styles.sectionHeaderText,
+                    { color: paperTheme.colors.onSurface },
+                  ]}
+                >
+                  {title}
+                </Text>
+              </View>
+            )}
+            ItemSeparatorComponent={Divider}
+            contentContainerStyle={{ flexGrow: 1 }}
+          />
+        )}
 
         {/* Кнопка добавления задачи */}
         <FAB
