@@ -62,9 +62,26 @@ src/
   screens/     сами экраны приложения
   services/    API, уведомления, локальное хранилище
   styles/      темы, цвета и стили
+server/        Express API для серверного хранения задач
 ```
 
 Если растерялся — начни с `src/screens`, там живёт основная логика отображения.
+
+---
+
+## 🌐 Серверная часть
+
+В папке `TaskManager/server` лежит простой Express API. Он сохраняет задачи на диске (`data/tasks.json`) и даёт REST-эндпоинты для CRUD-операций.
+
+Быстрый старт:
+
+```bash
+cd TaskManager/server
+npm install
+npm start
+```
+
+По умолчанию сервер поднимается на `http://localhost:4000`. Эндпоинты и примеры запросов описаны в `TaskManager/server/README.md`.
 
 ---
 
